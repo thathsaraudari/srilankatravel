@@ -1,39 +1,57 @@
-# Sri Lanka Travel Website
+# Sri Lanka Travel
 
-WordPress MVP for a France-facing Sri Lanka travel package website.
+Custom WordPress travel-package website for a France-facing Sri Lanka travel business.
+
+## Current MVP
+
+The project is self-contained and does **not** require ACF Pro.
+
+### Admin
+- Tours
+- Hotels
+- Destinations and travel styles
+- Day-by-day itinerary editor
+- WordPress media picker for itinerary photos
+- Highlights, inclusions and exclusions
+- Price / price-on-request configuration
+- Enquiries stored in WordPress
+- Enquiry workflow: New → Contacted → Quoted → Booked / Closed
+- Quote amount, payment-link field and internal notes
+- Global site settings for contact details, currency, deposit percentage and payment mode
+
+### Frontend
+- French-first homepage
+- Tour listing
+- Tour detail pages
+- Responsive itinerary
+- Quote/enquiry form
+- Responsive custom theme
 
 ## Repository layout
 
-- `wp-content/plugins/slt-core/` — travel domain plugin (Tours, Hotels, Destinations, Enquiries, settings)
-- `wp-content/themes/slt-travel/` — custom public-facing theme
-- `.github/workflows/ci.yml` — PHP syntax checks and build artifacts
-- `.github/workflows/deploy-ftp.yml` — deployment of the plugin/theme to WordPress hosting over FTP
-- `scripts/build.sh` — builds installable plugin/theme ZIP files
+- `wp-content/plugins/slt-core/` — travel CMS and enquiry workflow
+- `wp-content/themes/slt-travel/` — public-facing theme
+- `wp-content/mu-plugins/slt-bootstrap.php` — one-time activation and demo-data bootstrap
+- `.github/workflows/ci.yml` — PHP validation and ZIP build
+- `.github/workflows/deploy-ftp.yml` — automatic InfinityFree deployment
+- `scripts/build.sh` — builds installable ZIP files
 
 ## Requirements
 
-- WordPress 6.5+
+- WordPress 6.4+
 - PHP 8.1+
-- ACF Pro for the structured admin fields used by the MVP
-- WooCommerce/Stripe can be added later for payments
+- No paid plugin required for the MVP
+- WooCommerce / Stripe will be added when direct payment functionality is enabled
 
-## Development workflow
+## Deployment
 
-1. Change code under `wp-content/plugins/slt-core` or `wp-content/themes/slt-travel`.
-2. Push to GitHub.
-3. GitHub Actions validates PHP syntax and builds installable ZIPs.
-4. Pushes to `main` automatically deploy the custom plugin and theme when FTP secrets are configured.
+Pushes to `main` that change the plugin, theme or bootstrap are automatically deployed to the configured InfinityFree WordPress installation.
 
-## Hosting deployment secrets
+The InfinityFree host, FTP username, port and WordPress path are configured in the workflow. GitHub only needs this repository secret:
 
-The FTP workflow expects these GitHub Actions secrets:
-
-- `FTP_SERVER`
-- `FTP_USERNAME`
 - `FTP_PASSWORD`
-- `FTP_REMOTE_PATH` — WordPress root path on the hosting account, e.g. `/htdocs/`
 
-The workflow deploys only the custom plugin and theme. WordPress core, uploads, database and `wp-config.php` stay outside source control.
+Never commit passwords, API keys, Stripe secrets or WordPress credentials.
 
 ## Build locally
 
@@ -41,7 +59,11 @@ The workflow deploys only the custom plugin and theme. WordPress core, uploads, 
 bash scripts/build.sh
 ```
 
-Generated files:
+Generated packages:
 
 - `dist/slt-core-plugin.zip`
 - `dist/slt-travel-theme.zip`
+
+## Demo content
+
+The bootstrap creates the initial 7-day Sri Lanka itinerary supplied for the project, along with the referenced hotels, destinations, menu and contact page. It is idempotent and will not create duplicates on every request.
