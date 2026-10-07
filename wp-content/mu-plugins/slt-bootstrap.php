@@ -153,3 +153,140 @@ add_action('init', function (): void {
     update_option('slt_bootstrap_completed_v4',1,false);
     delete_option('slt_bootstrap_error');
 },50);
+
+
+/**
+ * V5: informational pages and navigation only.
+ * Kept separate from the original demo bootstrap so this migration can be
+ * deployed/rolled back independently of tour and booking logic.
+ */
+add_action('init', function (): void {
+    if (get_option('slt_bootstrap_completed_v5_pages')) return;
+
+    $upsert_page = function (string $slug, string $title, string $content): int {
+        $page = get_page_by_path($slug);
+        $data = [
+            'post_type' => 'page',
+            'post_status' => 'publish',
+            'post_title' => $title,
+            'post_name' => $slug,
+            'post_content' => $content,
+        ];
+        if ($page) $data['ID'] = $page->ID;
+        $id = $page ? wp_update_post($data, true) : wp_insert_post($data, true);
+        return is_wp_error($id) ? 0 : (int) $id;
+    };
+
+    $pages = [];
+    $pages['about'] = $upsert_page('a-propos', 'À propos',
+        '<p>Nous créons des voyages privés au Sri Lanka avec une approche simple : des itinéraires clairs, flexibles et pensés pour être faciles à organiser depuis l’Europe.</p>' .
+        '<h2>Notre approche</h2><p>Nos circuits associent patrimoine, nature, montagnes et côte sans surcharger les journées. Les itinéraires présentés servent de base et peuvent évoluer selon les disponibilités et les préférences des voyageurs.</p>' .
+        '<h2>Une organisation locale</h2><p>Les prestations sur place sont coordonnées avec des partenaires locaux au Sri Lanka afin de construire un voyage cohérent de l’arrivée au départ.</p>'
+    );
+
+    $pages['why'] = $upsert_page('pourquoi-nous', 'Pourquoi nous',
+        '<h2>Voyages privés</h2><p>Vous voyagez à votre rythme, sans groupe imposé.</p>' .
+        '<h2>Itinéraires lisibles</h2><p>Chaque journée présente les étapes importantes, les hôtels et les repas prévus.</p>' .
+        '<h2>Flexibilité</h2><p>Les hôtels, certaines activités et le rythme peuvent être adaptés avant la confirmation finale.</p>' .
+        '<h2>Paiement européen</h2><p>Le futur checkout sera conçu autour de moyens de paiement familiers en Europe, avec Mollie comme prestataire de paiement.</p>'
+    );
+
+    $pages['faq'] = $upsert_page('faq', 'Questions fréquentes',
+        '<h2>Les circuits sont-ils privés ?</h2><p>Oui. Les itinéraires sont conçus pour des voyages privés.</p>' .
+        '<h2>Puis-je modifier un circuit ?</h2><p>Oui. Les hôtels, étapes et activités peuvent être adaptés selon les disponibilités.</p>' .
+        '<h2>Les vols sont-ils inclus ?</h2><p>Sauf indication contraire, les vols internationaux ne sont pas inclus.</p>' .
+        '<h2>Comment se passe le paiement ?</h2><p>Le site est actuellement en démonstration. Un parcours de paiement européen sera ajouté progressivement après validation de l’expérience de réservation.</p>'
+    );
+
+    $pages['payment'] = $upsert_page('paiement', 'Paiement sécurisé',
+        '<p>Le site sera préparé pour un paiement sécurisé via Mollie, avec des moyens de paiement adaptés aux voyageurs européens.</p>' .
+        '<h2>Moyens de paiement prévus</h2><p>Wero lorsqu’il est disponible, carte bancaire, Visa, Mastercard, Apple Pay, iDEAL pour les clients néerlandais, PayPal et virement SEPA.</p>' .
+        '<p><strong>Mode démonstration :</strong> aucun paiement réel n’est actuellement débité sur ce site.</p>'
+    );
+
+    $pages['terms'] = $upsert_page('conditions-generales', 'Conditions générales',
+        '<p><strong>Brouillon de démonstration.</strong> Cette page devra être complétée avec les informations légales de l’entreprise, les règles d’annulation, les remboursements et les responsabilités avant toute vente réelle.</p>' .
+        '<h2>Réservation</h2><p>Une réservation n’est définitive qu’après confirmation des disponibilités et acceptation du prix final.</p>' .
+        '<h2>Prix et acompte</h2><p>Le montant de l’acompte et le solde restant seront indiqués avant le paiement.</p>' .
+        '<h2>Modification et annulation</h2><p>Les conditions détaillées seront définies avant l’ouverture commerciale du site.</p>'
+    );
+
+    $pages['privacy'] = $upsert_page('politique-confidentialite', 'Politique de confidentialité',
+        '<p><strong>Brouillon de démonstration.</strong> L’identité complète du responsable du traitement et les durées de conservation seront ajoutées avant lancement.</p>' .
+        '<h2>Données collectées</h2><p>Les demandes de voyage peuvent inclure le nom, l’adresse e-mail, le téléphone, les dates et le nombre de voyageurs.</p>' .
+        '<h2>Utilisation</h2><p>Ces informations servent uniquement à répondre aux demandes et organiser les prestations demandées.</p>' .
+        '<h2>Paiement</h2><p>Lorsque le paiement sera activé, les données bancaires sensibles seront traitées par le prestataire de paiement et ne seront pas stockées directement sur ce site.</p>'
+    );
+
+    $contact = get_page_by_path('contact');
+    $contact_id = $contact ? (int) $contact->ID : 0;
+
+    $menu = wp_get_nav_menu_object('Primary');
+    $menu_id = $menu ? (int) $menu->term_id : wp_create_nav_menu('Primary');
+    if (!is_wp_error($menu_id)) {
+        foreach (wp_get_nav_menu_items($menu_id) ?: [] as $item) {
+            wp_delete_post($item->ID, true);
+        }
+
+        wp_update_nav_menu_item($menu_id, 0, [
+            'menu-item-title' => 'Accueil',
+            'menu-item-url' => home_url('/'),
+            'menu-item-status' => 'publish',
+            'menu-item-type' => 'custom',
+        ]);
+        wp_update_nav_menu_item($menu_id, 0, [
+            'menu-item-title' => 'Circuits',
+            'menu-item-url' => get_post_type_archive_link('slt_tour') ?: home_url('/tours/'),
+            'menu-item-status' => 'publish',
+            'menu-item-type' => 'custom',
+        ]);
+
+        foreach ([
+            ['title' => 'À propos', 'id' => $pages['about']],
+            ['title' => 'Pourquoi nous', 'id' => $pages['why']],
+            ['title' => 'FAQ', 'id' => $pages['faq']],
+            ['title' => 'Contact', 'id' => $contact_id],
+        ] as $entry) {
+            if (!$entry['id']) continue;
+            wp_update_nav_menu_item($menu_id, 0, [
+                'menu-item-title' => $entry['title'],
+                'menu-item-object-id' => $entry['id'],
+                'menu-item-object' => 'page',
+                'menu-item-status' => 'publish',
+                'menu-item-type' => 'post_type',
+            ]);
+        }
+
+        $footer = wp_get_nav_menu_object('Footer');
+        $footer_id = $footer ? (int) $footer->term_id : wp_create_nav_menu('Footer');
+        if (!is_wp_error($footer_id)) {
+            foreach (wp_get_nav_menu_items($footer_id) ?: [] as $item) {
+                wp_delete_post($item->ID, true);
+            }
+            foreach ([
+                ['title' => 'À propos', 'id' => $pages['about']],
+                ['title' => 'FAQ', 'id' => $pages['faq']],
+                ['title' => 'Paiement', 'id' => $pages['payment']],
+                ['title' => 'Conditions générales', 'id' => $pages['terms']],
+                ['title' => 'Confidentialité', 'id' => $pages['privacy']],
+                ['title' => 'Contact', 'id' => $contact_id],
+            ] as $entry) {
+                if (!$entry['id']) continue;
+                wp_update_nav_menu_item($footer_id, 0, [
+                    'menu-item-title' => $entry['title'],
+                    'menu-item-object-id' => $entry['id'],
+                    'menu-item-object' => 'page',
+                    'menu-item-status' => 'publish',
+                    'menu-item-type' => 'post_type',
+                ]);
+            }
+        }
+
+        $locations = get_theme_mod('nav_menu_locations', []);
+        $locations['primary'] = $menu_id;
+        if (!empty($footer_id) && !is_wp_error($footer_id)) $locations['footer'] = $footer_id;
+        set_theme_mod('nav_menu_locations', $locations);
+    }
+
+    update_option('slt_bootstrap_completed_v5_pages', 1, false);
+}, 60);
