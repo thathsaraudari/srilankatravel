@@ -1,5 +1,9 @@
 name: Deploy to InfinityFree
 
+concurrency:
+  group: infinityfree-deploy
+  cancel-in-progress: false
+
 on:
   workflow_dispatch:
   push:
