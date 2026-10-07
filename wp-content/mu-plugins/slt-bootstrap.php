@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SLT Bootstrap
  * Description: One-time setup and demo content for the Sri Lanka Travel site.
- * Version: 0.2.0
+ * Version: 0.2.1
  */
 if (!defined('ABSPATH')) exit;
 
