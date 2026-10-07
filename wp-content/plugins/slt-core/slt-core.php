@@ -254,21 +254,21 @@ final class SLT_Core {
         $atts=shortcode_atts(['tour_id'=>get_the_ID()],$atts,'slt_enquiry_form');
         $tour_id=absint($atts['tour_id']);
         ob_start(); ?>
-        <?php if(isset($_GET['enquiry'])&&$_GET['enquiry']==='success'): ?><div class="slt-notice">Thank you — your trip request has been sent. We’ll be in touch soon.</div><?php endif; ?>
+        <?php if(isset($_GET['enquiry'])&&$_GET['enquiry']==='success'): ?><div class="slt-notice">Merci — votre demande de voyage a bien été envoyée. Nous vous contacterons rapidement.</div><?php endif; ?>
         <form class="slt-enquiry-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
             <input type="hidden" name="action" value="slt_submit_enquiry"><input type="hidden" name="tour_id" value="<?php echo esc_attr($tour_id); ?>">
             <?php wp_nonce_field('slt_submit_enquiry','slt_nonce'); ?>
             <div class="slt-form-grid">
-                <label>Full name<input name="name" required autocomplete="name"></label>
+                <label>Nom complet<input name="name" required autocomplete="name"></label>
                 <label>Email<input type="email" name="email" required autocomplete="email"></label>
-                <label>Phone / WhatsApp<input name="phone" autocomplete="tel"></label>
-                <label>Travel date<input type="date" name="travel_date"></label>
-                <label>Adults<input type="number" name="adults" min="1" value="2"></label>
-                <label>Children<input type="number" name="children" min="0" value="0"></label>
+                <label>Téléphone / WhatsApp<input name="phone" autocomplete="tel"></label>
+                <label>Date de voyage<input type="date" name="travel_date"></label>
+                <label>Adultes<input type="number" name="adults" min="1" value="2"></label>
+                <label>Enfants<input type="number" name="children" min="0" value="0"></label>
             </div>
-            <label>Tell us about your trip<textarea name="message" rows="5" placeholder="Interests, preferred hotel level, special requests…"></textarea></label>
-            <label class="slt-checkbox"><input type="checkbox" name="privacy" value="1" required> I agree that my information may be used to answer this enquiry.</label>
-            <button class="slt-button" type="submit">Request my quote</button>
+            <label>Parlez-nous de votre voyage<textarea name="message" rows="5" placeholder="Centres d’intérêt, catégorie d’hôtel, demandes particulières…"></textarea></label>
+            <label class="slt-checkbox"><input type="checkbox" name="privacy" value="1" required> J’accepte que mes informations soient utilisées pour répondre à ma demande.</label>
+            <button class="slt-button" type="submit">Demander mon devis</button>
         </form>
         <?php return (string)ob_get_clean();
     }
@@ -283,7 +283,7 @@ final class SLT_Core {
             foreach(['phone','travel_date','adults','children','message'] as $key){$value=$_POST[$key]??'';$value=$key==='message'?sanitize_textarea_field(wp_unslash($value)):sanitize_text_field(wp_unslash($value));update_post_meta($id,'_slt_'.$key,$value);}
             update_post_meta($id,'_slt_name',$name);update_post_meta($id,'_slt_email',$email);update_post_meta($id,'_slt_tour_id',$tour_id);
             $to=self::setting('business_email',get_option('admin_email'))?:get_option('admin_email');
-            wp_mail($to,'New trip enquiry: '.$tour,"Name: $name\nEmail: $email\nTour: $tour\nTravel date: ".sanitize_text_field(wp_unslash($_POST['travel_date']??''))."\n\n".sanitize_textarea_field(wp_unslash($_POST['message']??'')),['Reply-To: '.$name.' <'.$email.'>']);
+            wp_mail($to,'Nouvelle demande de voyage : '.$tour,"Name: $name\nEmail: $email\nTour: $tour\nTravel date: ".sanitize_text_field(wp_unslash($_POST['travel_date']??''))."\n\n".sanitize_textarea_field(wp_unslash($_POST['message']??'')),['Reply-To: '.$name.' <'.$email.'>']);
         }
         wp_safe_redirect(add_query_arg('enquiry','success',wp_get_referer()?:home_url('/')));exit;
     }
