@@ -31,3 +31,15 @@
 @media(max-width:1100px){.tour-layout{grid-template-columns:minmax(0,1fr) 390px;gap:40px}}
 @media(max-width:900px){.tour-layout{grid-template-columns:1fr}.booking-card .slt-form-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.booking-card .slt-form-grid{grid-template-columns:1fr}}
+
+/* Complete-site polish */
+.brand__logo--wide{width:188px;height:auto;max-height:58px;object-fit:contain}
+.trust-strip{background:#173f32;color:#fff;border-top:1px solid rgba(255,255,255,.1)}
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.trust-grid>div{padding:24px 22px;border-right:1px solid rgba(255,255,255,.12);display:grid;gap:2px}
+.trust-grid>div:last-child{border-right:0}.trust-grid strong{font-family:Georgia,serif;font-size:1.08rem}.trust-grid span{font-size:.76rem;color:#c7d8d0}
+.service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.service-card{display:block;padding:28px;border:1px solid var(--line);border-radius:16px;background:#fff;transition:transform .2s ease,box-shadow .2s ease}.service-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.service-card>span{display:block;color:var(--accent);font-weight:900;letter-spacing:.14em;font-size:.72rem;margin-bottom:24px}.service-card p{color:var(--muted);font-size:.92rem}.service-card h3{font-size:1.4rem}
+.footer-grid--complete{grid-template-columns:1.25fr .7fr .8fr 1fr}.footer-logo{width:205px;max-width:100%;filter:brightness(0) invert(1);opacity:.96;margin-bottom:18px}.site-footer li{margin:7px 0}.site-footer a:hover{color:#f2c49e}
+.page .prose,.page-content{font-size:1.04rem}.prose .lead,.page-content .lead{font-size:1.22rem;color:var(--muted)}
+@media(max-width:1050px){.service-grid{grid-template-columns:1fr 1fr}.trust-grid{grid-template-columns:1fr 1fr}.footer-grid--complete{grid-template-columns:1fr 1fr}.brand__logo--wide{width:165px}.primary-nav ul{gap:18px}}
+@media(max-width:640px){.service-grid,.trust-grid,.footer-grid--complete{grid-template-columns:1fr}.trust-grid>div{border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}.brand__logo--wide{width:150px}}

@@ -1,7 +1,8 @@
 </main>
-<footer class="site-footer"><div class="container footer-grid">
-<div><div class="brand brand--footer"><span class="brand__mark">SL</span><span><?php bloginfo('name'); ?></span></div><p>Des voyages privés au Sri Lanka, pensés avec une vraie connaissance locale.</p></div>
-<div><h3>Explorer</h3><?php wp_nav_menu(['theme_location'=>'footer','container'=>false,'fallback_cb'=>false]); ?></div>
-<div><h3>Contact</h3><p><a href="<?php echo esc_url(home_url('/contact/')); ?>">Demander un voyage personnalisé</a></p></div>
-</div><div class="container footer-bottom">© <?php echo esc_html((string)date('Y')); ?> <?php bloginfo('name'); ?></div></footer>
+<footer class="site-footer"><div class="container footer-grid footer-grid--complete">
+<div><a class="brand brand--footer" href="<?php echo esc_url(home_url('/')); ?>"><img class="footer-logo" src="<?php echo esc_url(get_template_directory_uri().'/assets/images/logo-mark.svg'); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>"></a><p>Voyages privés et sur mesure au Sri Lanka, préparés avec soin depuis l’Europe et coordonnés avec des partenaires locaux.</p></div>
+<div><h3>Découvrir</h3><ul><li><a href="<?php echo esc_url(home_url('/tours/')); ?>">Nos circuits</a></li><li><a href="<?php echo esc_url(home_url('/nos-services/')); ?>">Nos services</a></li><li><a href="<?php echo esc_url(home_url('/a-propos/')); ?>">À propos</a></li><li><a href="<?php echo esc_url(home_url('/comment-ca-marche/')); ?>">Comment ça marche</a></li><li><a href="<?php echo esc_url(home_url('/faq/')); ?>">FAQ</a></li></ul></div>
+<div><h3>Informations</h3><ul><li><a href="<?php echo esc_url(home_url('/paiement/')); ?>">Paiement sécurisé</a></li><li><a href="<?php echo esc_url(home_url('/conditions-generales/')); ?>">Conditions générales</a></li><li><a href="<?php echo esc_url(home_url('/politique-confidentialite/')); ?>">Confidentialité</a></li><li><a href="<?php echo esc_url(home_url('/contact/')); ?>">Contact</a></li></ul></div>
+<div><h3>Votre voyage</h3><p>Vous avez déjà une idée de dates ou d’itinéraire ?</p><a class="button button--small" href="<?php echo esc_url(home_url('/contact/')); ?>">Parler de mon projet</a></div>
+</div><div class="container footer-bottom">© <?php echo esc_html((string)date('Y')); ?> <?php bloginfo('name'); ?> · Site de démonstration</div></footer>
 <?php wp_footer(); ?></body></html>

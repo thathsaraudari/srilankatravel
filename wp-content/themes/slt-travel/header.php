@@ -4,8 +4,7 @@
 <body <?php body_class(); ?>><?php wp_body_open(); ?>
 <header class="site-header"><div class="container nav-wrap">
 <a class="brand" href="<?php echo esc_url(home_url('/')); ?>">
-<img class="brand__logo" src="<?php echo esc_url(get_template_directory_uri().'/assets/images/logo-mark.svg'); ?>" width="42" height="42" alt="">
-<span><?php bloginfo('name'); ?></span>
+<img class="brand__logo brand__logo--wide" src="<?php echo esc_url(get_template_directory_uri().'/assets/images/logo-mark.svg'); ?>" width="188" height="54" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
 </a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
 <nav id="primary-nav" class="primary-nav"><?php wp_nav_menu(['theme_location'=>'primary','container'=>false,'fallback_cb'=>false]); ?></nav>

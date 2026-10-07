@@ -303,3 +303,86 @@ add_action('init', function (): void {
     update_option('blogdescription', 'Voyages privés au Sri Lanka');
     update_option('slt_bootstrap_completed_v6_brand', 1, false);
 }, 70);
+
+
+/**
+ * V7: complete public site structure and copy.
+ */
+add_action('init', function (): void {
+    if (get_option('slt_bootstrap_completed_v7_complete_site')) return;
+
+    $upsert = function(string $slug,string $title,string $content): int {
+        $page=get_page_by_path($slug);
+        $data=['post_type'=>'page','post_status'=>'publish','post_title'=>$title,'post_name'=>$slug,'post_content'=>$content];
+        if($page)$data['ID']=$page->ID;
+        $id=$page?wp_update_post($data,true):wp_insert_post($data,true);
+        return is_wp_error($id)?0:(int)$id;
+    };
+
+    $pages=[];
+    $pages['services']=$upsert('nos-services','Nos services',
+        '<p class="lead">Un voyage au Sri Lanka ne se résume pas à une liste d’hôtels. Nous organisons les éléments essentiels autour d’un itinéraire cohérent et adaptable.</p>'.
+        '<h2>Circuits privés</h2><p>Des voyages conçus pour votre groupe uniquement, avec chauffeur et étapes organisées selon l’itinéraire confirmé.</p>'.
+        '<h2>Voyages sur mesure</h2><p>Vous pouvez partir d’un circuit existant ou nous transmettre vos dates, votre rythme et vos centres d’intérêt afin d’adapter le programme.</p>'.
+        '<h2>Transferts & chauffeur</h2><p>Accueil à l’aéroport et déplacements privés au Sri Lanka coordonnés avec des partenaires locaux sélectionnés.</p>'.
+        '<h2>Hôtels & hébergements</h2><p>Nous intégrons les hôtels au programme en fonction de la catégorie souhaitée, du parcours et des disponibilités.</p>'.
+        '<h2>Excursions & expériences</h2><p>Sites culturels, safaris, plantations de thé, balades en bateau, plages et autres expériences peuvent être ajoutés à votre voyage.</p>'
+    );
+    $pages['how']=$upsert('comment-ca-marche','Comment ça marche',
+        '<p class="lead">Une réservation claire, en quatre étapes.</p>'.
+        '<h2>1. Choisissez ou imaginez votre voyage</h2><p>Commencez avec l’un de nos circuits ou décrivez-nous votre projet.</p>'.
+        '<h2>2. Personnalisation & disponibilités</h2><p>Nous adaptons le rythme, les hôtels et les expériences puis vérifions les disponibilités auprès de nos partenaires.</p>'.
+        '<h2>3. Confirmation du programme et du prix</h2><p>Vous recevez les prestations prévues, le prix final et les conditions applicables avant tout paiement.</p>'.
+        '<h2>4. Réservation & préparation</h2><p>Après confirmation, vous réservez selon les modalités indiquées et recevez les informations utiles pour préparer votre départ.</p>'
+    );
+    $pages['about']=$upsert('a-propos','À propos',
+        '<p class="lead">Sri Lanka Voyages est né d’une idée simple : apporter au voyage au Sri Lanka le même niveau d’attention, de communication et de fiabilité que celui attendu par les voyageurs en Europe.</p>'.
+        '<h2>Une expérience avec les voyageurs internationaux</h2><p>Notre équipe s’appuie sur une expérience de service aux voyageurs en France, notamment à travers Private Cab Transfert, qui propose des transferts privés, des prises en charge aéroport et des excursions. Cette expérience nous a appris l’importance de la ponctualité, d’une communication claire et d’un accompagnement simple.</p>'.
+        '<h2>Une organisation locale au Sri Lanka</h2><p>Pour les circuits au Sri Lanka, les prestations sont organisées avec des partenaires locaux. L’objectif est de réunir transport, hôtels et expériences dans un itinéraire facile à comprendre avant votre départ.</p>'.
+        '<h2>Des voyages qui restent personnels</h2><p>Les programmes présentés sur le site sont des bases. Nous pouvons ajuster les étapes, la durée, les hébergements et certaines activités selon vos préférences et les disponibilités.</p>'
+    );
+    $pages['why']=$upsert('pourquoi-nous','Pourquoi nous choisir',
+        '<h2>Voyages privés</h2><p>Votre circuit est organisé pour votre groupe, sans départ collectif imposé.</p>'.
+        '<h2>Expérience du service en Europe</h2><p>Notre expérience auprès de voyageurs internationaux en France influence notre façon de communiquer et d’organiser chaque étape.</p>'.
+        '<h2>Partenaires locaux</h2><p>Les prestations au Sri Lanka sont coordonnées avec des partenaires locaux afin d’assurer la continuité du voyage.</p>'.
+        '<h2>Flexibilité</h2><p>Les itinéraires peuvent être ajustés avant confirmation selon vos dates, votre rythme et vos préférences.</p>'.
+        '<h2>Clarté avant paiement</h2><p>Le programme, les prestations et le prix final sont confirmés avant la réservation définitive.</p>'
+    );
+    $pages['faq']=$upsert('faq','Questions fréquentes',
+        '<h2>Les circuits sont-ils privés ?</h2><p>Oui. Les itinéraires sont prévus pour votre groupe uniquement.</p>'.
+        '<h2>Puis-je modifier un circuit ?</h2><p>Oui. La durée, certains hôtels, étapes et activités peuvent être adaptés selon les disponibilités.</p>'.
+        '<h2>Les vols internationaux sont-ils inclus ?</h2><p>Non, sauf mention explicite dans une proposition personnalisée.</p>'.
+        '<h2>Comment le prix est-il calculé ?</h2><p>Il dépend notamment des dates, du nombre de voyageurs, des hôtels, du transport et des activités choisies.</p>'.
+        '<h2>Comment se passe le paiement ?</h2><p>Le programme et le prix sont d’abord confirmés. Le site est actuellement en démonstration ; le paiement en ligne sera activé avec un prestataire européen avant l’ouverture commerciale.</p>'.
+        '<h2>Qui organise le voyage sur place ?</h2><p>Les prestations au Sri Lanka sont exécutées et coordonnées avec des partenaires locaux selon le programme confirmé.</p>'
+    );
+
+    $contact=get_page_by_path('contact');
+    $contact_id=$contact?(int)$contact->ID:0;
+
+    $menu=wp_get_nav_menu_object('Primary');
+    $menu_id=$menu?(int)$menu->term_id:wp_create_nav_menu('Primary');
+    if(!is_wp_error($menu_id)){
+        foreach(wp_get_nav_menu_items($menu_id)?:[] as $item)wp_delete_post($item->ID,true);
+        $entries=[
+            ['Accueil',0,home_url('/')],
+            ['Circuits',0,get_post_type_archive_link('slt_tour')?:home_url('/tours/')],
+            ['Nos services',$pages['services'],''],
+            ['À propos',$pages['about'],''],
+            ['FAQ',$pages['faq'],''],
+            ['Contact',$contact_id,''],
+        ];
+        foreach($entries as [$title,$id,$url]){
+            if($id)wp_update_nav_menu_item($menu_id,0,['menu-item-title'=>$title,'menu-item-object-id'=>$id,'menu-item-object'=>'page','menu-item-status'=>'publish','menu-item-type'=>'post_type']);
+            elseif($url)wp_update_nav_menu_item($menu_id,0,['menu-item-title'=>$title,'menu-item-url'=>$url,'menu-item-status'=>'publish','menu-item-type'=>'custom']);
+        }
+        $locations=get_theme_mod('nav_menu_locations',[]);
+        $locations['primary']=$menu_id;
+        set_theme_mod('nav_menu_locations',$locations);
+    }
+
+    update_option('blogname','Sri Lanka Voyages');
+    update_option('blogdescription','Voyages privés et sur mesure au Sri Lanka');
+    update_option('slt_bootstrap_completed_v7_complete_site',1,false);
+    flush_rewrite_rules(false);
+},80);
