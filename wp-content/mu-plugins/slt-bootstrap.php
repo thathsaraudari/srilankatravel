@@ -290,3 +290,16 @@ add_action('init', function (): void {
 
     update_option('slt_bootstrap_completed_v5_pages', 1, false);
 }, 60);
+
+
+/**
+ * V6: demo branding only.
+ */
+add_action('init', function (): void {
+    if (get_option('slt_bootstrap_completed_v6_brand')) return;
+    if (get_option('blogname') === 'My Blog' || trim((string)get_option('blogname')) === '') {
+        update_option('blogname', 'Sri Lanka Voyages');
+    }
+    update_option('blogdescription', 'Voyages privés au Sri Lanka');
+    update_option('slt_bootstrap_completed_v6_brand', 1, false);
+}, 70);
