@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SLT Bootstrap
  * Description: One-time setup and demo content for the Sri Lanka Travel site.
- * Version: 0.2.1
+ * Version: 0.3.0
  */
 if (!defined('ABSPATH')) exit;
 
@@ -10,16 +10,17 @@ add_action('init', function (): void {
     require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
     $plugin='slt-core/slt-core.php';
-    if (!is_plugin_active($plugin)) {
+    if (!class_exists('SLT_Core') && file_exists(WP_PLUGIN_DIR.'/slt-core/slt-core.php')) {
+        require_once WP_PLUGIN_DIR.'/slt-core/slt-core.php';
+    }
+    if (!is_plugin_active($plugin) && class_exists('SLT_Core')) {
         $result=activate_plugin($plugin);
         if (is_wp_error($result)) update_option('slt_bootstrap_error',$result->get_error_message(),false);
-        return;
     }
 
     $theme=wp_get_theme('slt-travel');
     if ($theme->exists() && get_stylesheet()!=='slt-travel') {
         switch_theme('slt-travel');
-        return;
     }
 
     if (get_option('slt_bootstrap_completed_v2')) return;
