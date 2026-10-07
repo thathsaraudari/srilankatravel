@@ -7,12 +7,25 @@ on:
     paths:
       - 'wp-content/plugins/slt-core/**'
       - 'wp-content/themes/slt-travel/**'
+      - 'wp-content/mu-plugins/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Deploy bootstrap
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ftpupload.net
+          username: if0_43111316
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./wp-content/mu-plugins/
+          server-dir: /htdocs/wp-content/mu-plugins/
+          dangerous-clean-slate: false
 
       - name: Deploy SLT plugin
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
