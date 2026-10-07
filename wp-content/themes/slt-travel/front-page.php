@@ -1,5 +1,13 @@
 <?php get_header(); ?>
-<section class="hero"><div class="hero__overlay"></div><div class="container hero__content">
+<section class="hero">
+<div class="hero-slideshow" aria-hidden="true">
+  <img class="hero-slide hero-slide--1" src="https://images.unsplash.com/photo-1612862862126-865765df2ded?auto=format&fit=crop&w=2200&q=85" alt="">
+  <img class="hero-slide hero-slide--2" src="https://images.unsplash.com/photo-1586193804147-64d5c02ef9c1?auto=format&fit=crop&w=2200&q=85" alt="">
+  <img class="hero-slide hero-slide--3" src="https://images.unsplash.com/photo-1566650576880-6740b03eaad1?auto=format&fit=crop&w=2200&q=85" alt="">
+  <img class="hero-slide hero-slide--4" src="https://images.unsplash.com/photo-1598955890270-d77cdb06d2bb?auto=format&fit=crop&w=2200&q=85" alt="">
+  <img class="hero-slide hero-slide--5" src="https://images.unsplash.com/photo-1589373797397-d19670f47549?auto=format&fit=crop&w=2200&q=85" alt="">
+</div>
+<div class="hero__overlay"></div><div class="container hero__content">
 <div class="eyebrow eyebrow--light">Voyages privés au Sri Lanka</div>
 <h1>Découvrez le Sri Lanka,<br>à votre façon.</h1>
 <p>Culture, safaris, montagnes de thé et plages tropicales — réunis dans des itinéraires privés que vous pouvez personnaliser.</p>
