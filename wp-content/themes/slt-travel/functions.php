@@ -12,8 +12,8 @@ function slt_theme_setup(): void {
 add_action('after_setup_theme','slt_theme_setup');
 
 function slt_enqueue_assets(): void {
-    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.2.0');
-    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.2.0',true);
+    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.2.1');
+    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.2.1',true);
 }
 add_action('wp_enqueue_scripts','slt_enqueue_assets');
 
