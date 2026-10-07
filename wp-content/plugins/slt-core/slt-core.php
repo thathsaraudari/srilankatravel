@@ -18,7 +18,10 @@ final class SLT_Core {
         add_action('add_meta_boxes', [__CLASS__, 'meta_boxes']);
         add_action('save_post_slt_tour', [__CLASS__, 'save_tour']);
         add_action('save_post_slt_hotel', [__CLASS__, 'save_hotel']);
+        add_action('save_post_slt_enquiry', [__CLASS__, 'save_enquiry']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'admin_assets']);
+        add_filter('manage_slt_tour_posts_columns', [__CLASS__, 'tour_columns']);
+        add_action('manage_slt_tour_posts_custom_column', [__CLASS__, 'tour_column'], 10, 2);
         add_filter('manage_slt_enquiry_posts_columns', [__CLASS__, 'enquiry_columns']);
         add_action('manage_slt_enquiry_posts_custom_column', [__CLASS__, 'enquiry_column'], 10, 2);
         add_shortcode('slt_enquiry_form', [__CLASS__, 'form']);
@@ -191,12 +194,27 @@ final class SLT_Core {
     <?php }
 
     public static function enquiry_box(WP_Post $post): void {
-        $tour_id=(int)get_post_meta($post->ID,'_slt_tour_id',true);$fields=['Name'=>'_slt_name','Email'=>'_slt_email','Phone / WhatsApp'=>'_slt_phone','Travel date'=>'_slt_travel_date','Adults'=>'_slt_adults','Children'=>'_slt_children','Message'=>'_slt_message'];
+        wp_nonce_field('slt_save_enquiry','slt_enquiry_nonce');
+        $tour_id=(int)get_post_meta($post->ID,'_slt_tour_id',true);
+        $fields=['Name'=>'_slt_name','Email'=>'_slt_email','Phone / WhatsApp'=>'_slt_phone','Travel date'=>'_slt_travel_date','Adults'=>'_slt_adults','Children'=>'_slt_children','Message'=>'_slt_message'];
         echo '<table class="widefat striped slt-enquiry-table"><tbody>';
         if($tour_id) echo '<tr><th>Tour</th><td><a href="'.esc_url(get_edit_post_link($tour_id)).'">'.esc_html(get_the_title($tour_id)).'</a></td></tr>';
         foreach($fields as $label=>$key){$value=get_post_meta($post->ID,$key,true);echo '<tr><th>'.esc_html($label).'</th><td>'.nl2br(esc_html((string)$value)).'</td></tr>';}
         echo '</tbody></table>';
-    }
+
+        $status=get_post_meta($post->ID,'_slt_status',true)?:'new';
+        $quote=get_post_meta($post->ID,'_slt_quote_amount',true);
+        $payment=get_post_meta($post->ID,'_slt_payment_link',true);
+        $notes=get_post_meta($post->ID,'_slt_internal_notes',true); ?>
+        <div class="slt-admin-section"><h3>Sales follow-up</h3><div class="slt-admin-grid">
+            <div class="slt-field"><label>Status</label><select name="slt_enquiry[status]">
+                <?php foreach(['new'=>'New','contacted'=>'Contacted','quoted'=>'Quoted','booked'=>'Booked','closed'=>'Closed'] as $k=>$v): ?><option value="<?php echo esc_attr($k); ?>" <?php selected($status,$k); ?>><?php echo esc_html($v); ?></option><?php endforeach; ?>
+            </select></div>
+            <div class="slt-field"><label>Quote total (€)</label><input type="number" min="0" step="0.01" name="slt_enquiry[quote_amount]" value="<?php echo esc_attr((string)$quote); ?>"></div>
+            <div class="slt-field slt-field--wide"><label>Payment link</label><input type="url" name="slt_enquiry[payment_link]" value="<?php echo esc_attr((string)$payment); ?>" placeholder="https://..."></div>
+            <div class="slt-field slt-field--wide"><label>Internal notes</label><textarea rows="5" name="slt_enquiry[internal_notes]"><?php echo esc_textarea((string)$notes); ?></textarea></div>
+        </div></div>
+    <?php }
 
     public static function save_tour(int $post_id): void {
         if (!isset($_POST['slt_tour_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['slt_tour_nonce'])),'slt_save_tour') || !current_user_can('edit_post',$post_id) || (defined('DOING_AUTOSAVE')&&DOING_AUTOSAVE)) return;
@@ -236,10 +254,30 @@ final class SLT_Core {
     }
     private static function as_array($value): array { return is_array($value)?$value:[]; }
 
+    public static function save_enquiry(int $post_id): void {
+        if (!isset($_POST['slt_enquiry_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['slt_enquiry_nonce'])),'slt_save_enquiry') || !current_user_can('edit_post',$post_id) || (defined('DOING_AUTOSAVE')&&DOING_AUTOSAVE)) return;
+        $s=isset($_POST['slt_enquiry'])&&is_array($_POST['slt_enquiry'])?wp_unslash($_POST['slt_enquiry']):[];
+        $status=in_array(($s['status']??'new'),['new','contacted','quoted','booked','closed'],true)?$s['status']:'new';
+        update_post_meta($post_id,'_slt_status',$status);
+        update_post_meta($post_id,'_slt_quote_amount',max(0,(float)($s['quote_amount']??0)));
+        update_post_meta($post_id,'_slt_payment_link',esc_url_raw($s['payment_link']??''));
+        update_post_meta($post_id,'_slt_internal_notes',sanitize_textarea_field($s['internal_notes']??''));
+    }
+
+    public static function tour_columns(array $columns): array {
+        return ['cb'=>$columns['cb']??'','title'=>'Tour','slt_duration'=>'Duration','slt_price'=>'Price','slt_featured'=>'Featured','date'=>'Date'];
+    }
+    public static function tour_column(string $column,int $post_id): void {
+        if($column==='slt_duration'){ $d=(int)get_post_meta($post_id,'duration_days',true);$n=(int)get_post_meta($post_id,'duration_nights',true);echo esc_html($d.' days / '.$n.' nights'); }
+        if($column==='slt_price'){ $basis=get_post_meta($post_id,'price_basis',true);$price=get_post_meta($post_id,'price_from',true);echo $basis==='request'?'On request':esc_html($price?('€'.number_format_i18n((float)$price,0)):'—'); }
+        if($column==='slt_featured')echo get_post_meta($post_id,'featured',true)?'★':'—';
+    }
+
     public static function enquiry_columns(array $columns): array {
-        return ['cb'=>$columns['cb']??'','title'=>'Enquiry','slt_email'=>'Email','slt_tour'=>'Tour','slt_date'=>'Travel date','date'=>'Received'];
+        return ['cb'=>$columns['cb']??'','title'=>'Enquiry','slt_status'=>'Status','slt_email'=>'Email','slt_tour'=>'Tour','slt_date'=>'Travel date','date'=>'Received'];
     }
     public static function enquiry_column(string $column,int $post_id): void {
+        if($column==='slt_status'){ $status=get_post_meta($post_id,'_slt_status',true)?:'new';$labels=['new'=>'New','contacted'=>'Contacted','quoted'=>'Quoted','booked'=>'Booked','closed'=>'Closed'];echo esc_html($labels[$status]??ucfirst($status)); }
         if($column==='slt_email')echo esc_html((string)get_post_meta($post_id,'_slt_email',true));
         if($column==='slt_tour'){ $id=(int)get_post_meta($post_id,'_slt_tour_id',true); echo $id?esc_html(get_the_title($id)):'Tailor-made'; }
         if($column==='slt_date')echo esc_html((string)get_post_meta($post_id,'_slt_travel_date',true));
@@ -281,7 +319,7 @@ final class SLT_Core {
         $id=wp_insert_post(['post_type'=>'slt_enquiry','post_status'=>'publish','post_title'=>$name.' — '.$tour]);
         if (!is_wp_error($id)) {
             foreach(['phone','travel_date','adults','children','message'] as $key){$value=$_POST[$key]??'';$value=$key==='message'?sanitize_textarea_field(wp_unslash($value)):sanitize_text_field(wp_unslash($value));update_post_meta($id,'_slt_'.$key,$value);}
-            update_post_meta($id,'_slt_name',$name);update_post_meta($id,'_slt_email',$email);update_post_meta($id,'_slt_tour_id',$tour_id);
+            update_post_meta($id,'_slt_name',$name);update_post_meta($id,'_slt_email',$email);update_post_meta($id,'_slt_tour_id',$tour_id);update_post_meta($id,'_slt_status','new');
             $to=self::setting('business_email',get_option('admin_email'))?:get_option('admin_email');
             wp_mail($to,'Nouvelle demande de voyage : '.$tour,"Name: $name\nEmail: $email\nTour: $tour\nTravel date: ".sanitize_text_field(wp_unslash($_POST['travel_date']??''))."\n\n".sanitize_textarea_field(wp_unslash($_POST['message']??'')),['Reply-To: '.$name.' <'.$email.'>']);
         }
