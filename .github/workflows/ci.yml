@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          find wp-content/plugins/slt-core wp-content/themes/slt-travel -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Build installable ZIPs
+        run: bash scripts/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wordpress-packages
+          path: dist/*.zip
