@@ -15,5 +15,35 @@ $destinations=get_the_terms($id,'slt_destination'); ?>
 <?php if($hotel||$meals): ?><div class="day-meta"><?php if($hotel instanceof WP_Post): ?><span><strong>Hôtel :</strong> <?php echo esc_html($hotel->post_title); ?></span><?php endif; ?><?php if($meals): ?><span><strong>Repas :</strong> <?php echo esc_html(implode(', ',array_map(fn($m)=>['breakfast'=>'Petit-déjeuner','lunch'=>'Déjeuner','dinner'=>'Dîner'][$m]??ucfirst($m),$meals))); ?></span><?php endif; ?></div><?php endif; ?>
 </div></article><?php endforeach; ?></div></section><?php endif; ?>
 <?php if($included||$excluded): ?><section class="tour-section inclusions-grid"><?php if($included): ?><div><div class="eyebrow">Inclus</div><h2>Ce qui est inclus</h2><ul class="check-list"><?php foreach($included as $row): ?><li>✓ <?php echo esc_html($row['item']??''); ?></li><?php endforeach; ?></ul></div><?php endif; ?><?php if($excluded): ?><div><div class="eyebrow">À savoir</div><h2>Non inclus</h2><ul class="cross-list"><?php foreach($excluded as $row): ?><li>– <?php echo esc_html($row['item']??''); ?></li><?php endforeach; ?></ul></div><?php endif; ?></section><?php endif; ?>
-</article><aside class="tour-sidebar"><div class="quote-card"><div class="eyebrow">Votre voyage</div><div class="quote-card__price"><?php echo esc_html(slt_price_label($id)); ?></div><p>Indiquez vos dates et le nombre de voyageurs. Nous confirmerons les disponibilités et préparerons votre devis personnalisé.</p><?php echo do_shortcode('[slt_enquiry_form tour_id="'.$id.'"]'); ?></div></aside></div>
+</article><aside class="tour-sidebar"><div class="quote-card booking-card">
+<div class="eyebrow">Réserver ce circuit</div>
+<div class="quote-card__price"><?php echo esc_html(slt_price_label($id)); ?></div>
+<?php if(isset($_GET['enquiry'])&&$_GET['enquiry']==='success'): ?><div class="slt-notice">Votre réservation de démonstration a bien été enregistrée.</div><?php endif; ?>
+<div class="slt-demo-badge">Mode démonstration — aucun paiement réel ne sera débité.</div>
+<form class="slt-booking-demo-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+<input type="hidden" name="action" value="slt_submit_enquiry">
+<input type="hidden" name="tour_id" value="<?php echo esc_attr((string)$id); ?>">
+<input type="hidden" name="message" class="slt-booking-message" value="Réservation démo — moyen de paiement souhaité : Wero">
+<?php wp_nonce_field('slt_submit_enquiry','slt_nonce'); ?>
+<div class="slt-form-grid">
+<label>Nom<input name="name" required autocomplete="name"></label>
+<label>Email<input type="email" name="email" required autocomplete="email"></label>
+<label>Date de départ<input type="date" name="travel_date" required></label>
+<label>Adultes<input type="number" name="adults" min="1" value="2" required></label>
+<label>Enfants<input type="number" name="children" min="0" value="0"></label>
+<label>Téléphone<input name="phone" autocomplete="tel"></label>
+</div>
+<fieldset class="slt-payment-methods"><legend>Moyen de paiement souhaité</legend>
+<label class="slt-pay-option slt-pay-option--featured"><input type="radio" name="preferred_payment_method" value="Wero" checked><span><strong>Wero</strong><small>Paiement bancaire européen, si disponible</small></span></label>
+<label class="slt-pay-option"><input type="radio" name="preferred_payment_method" value="Carte bancaire"><span><strong>Carte bancaire</strong><small>CB / Visa / Mastercard</small></span></label>
+<label class="slt-pay-option"><input type="radio" name="preferred_payment_method" value="Apple Pay"><span><strong>Apple Pay</strong><small>Si disponible sur votre appareil</small></span></label>
+<label class="slt-pay-option"><input type="radio" name="preferred_payment_method" value="iDEAL"><span><strong>iDEAL</strong><small>Pour les clients néerlandais</small></span></label>
+<label class="slt-pay-option"><input type="radio" name="preferred_payment_method" value="PayPal"><span><strong>PayPal</strong></span></label>
+<label class="slt-pay-option"><input type="radio" name="preferred_payment_method" value="SEPA"><span><strong>Virement SEPA</strong></span></label>
+</fieldset>
+<label class="slt-checkbox"><input type="checkbox" name="privacy" value="1" required> J’accepte que mes informations soient utilisées pour traiter cette demande de réservation.</label>
+<button class="slt-button" type="submit">Créer ma réservation (démo)</button>
+<p class="slt-secure-note">Le paiement Mollie sera connecté dans une étape séparée après validation de ce parcours.</p>
+</form>
+</div></aside></div>
 <?php get_footer(); ?>
