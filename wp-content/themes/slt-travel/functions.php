@@ -12,8 +12,8 @@ function slt_theme_setup(): void {
 add_action('after_setup_theme','slt_theme_setup');
 
 function slt_enqueue_assets(): void {
-    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.2.3');
-    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.2.3',true);
+    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.2.4');
+    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.2.4',true);
 }
 add_action('wp_enqueue_scripts','slt_enqueue_assets');
 
@@ -46,7 +46,7 @@ function slt_price_label(int $post_id): string {
 function slt_render_tour_card(int $post_id): void {
     $days=(int)slt_field('duration_days',$post_id,0);
     $tagline=(string)slt_field('short_tagline',$post_id,get_the_excerpt($post_id));
-    $fallback='https://raw.githubusercontent.com/thathsaraudari/srilankatravel/main/wp-content/themes/slt-travel/assets/images/dambulla.webp'; ?>
+    $fallback='https://images.unsplash.com/photo-1612862862126-865765df2ded?auto=format&fit=crop&w=1400&q=82'; ?>
     <article class="tour-card">
         <a class="tour-card__image" href="<?php echo esc_url(get_permalink($post_id)); ?>">
             <?php if(has_post_thumbnail($post_id)): echo get_the_post_thumbnail($post_id,'large',['loading'=>'lazy']); else: ?><img src="<?php echo esc_url($fallback); ?>" alt="<?php echo esc_attr(get_the_title($post_id)); ?>" loading="lazy"><?php endif; ?>
