@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SLT Core
  * Description: Travel package content model, settings and enquiry handling for the Sri Lanka Travel site.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Requires at least: 6.4
  * Requires PHP: 8.1
  */
