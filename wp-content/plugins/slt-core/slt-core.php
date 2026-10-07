@@ -125,7 +125,7 @@ final class SLT_Core {
                     </select></div>
                     <div class="slt-field slt-field--wide"><label for="mollie_api_key">Mollie API key</label><input id="mollie_api_key" type="password" autocomplete="off" name="slt_settings[mollie_api_key]" value="<?php echo !empty($s['mollie_api_key'])?'••••••••':''; ?>" placeholder="test_xxx or live_xxx"><small>Stored in WordPress settings, never in GitHub. Use a test key while the site is a demo.</small></div>
                     <div class="slt-field slt-field--wide"><label>Checkout priority</label>
-                        <div class="slt-payment-priority"><strong>Wero</strong> → Cartes Bancaires / Visa / Mastercard → Apple Pay → iDEAL → PayPal / SEPA</div>
+                        <div class="slt-payment-priority"><strong>Wero</strong> → Carte bancaire (CB / Visa / Mastercard) → Apple Pay → iDEAL → PayPal / SEPA</div>
                     </div>
                     <div class="slt-field slt-field--wide"><label for="company_details">Company details</label><textarea id="company_details" rows="5" name="slt_settings[company_details]"><?php echo esc_textarea($s['company_details']??''); ?></textarea></div>
                 </div>
@@ -319,7 +319,7 @@ final class SLT_Core {
                     <label>Enfants<input type="number" name="children" min="0" value="0"></label>
                 </div>
                 <fieldset class="slt-payment-methods"><legend>Moyen de paiement</legend>
-                    <label class="slt-pay-option slt-pay-option--featured"><input type="radio" name="payment_method" value="wero" checked><span><strong>Wero</strong><small>Paiement bancaire européen instantané</small></span><b>Recommandé</b></label>
+                    <label class="slt-pay-option slt-pay-option--featured"><input type="radio" name="payment_method" value="wero" checked><span><strong>Wero</strong><small>Paiement bancaire européen instantané, si disponible</small></span><b>Européen</b></label>
                     <label class="slt-pay-option"><input type="radio" name="payment_method" value="creditcard"><span><strong>Cartes Bancaires / Visa / Mastercard</strong><small>Idéal pour les clients en France</small></span></label>
                     <label class="slt-pay-option"><input type="radio" name="payment_method" value="applepay"><span><strong>Apple Pay</strong><small>Si disponible sur l’appareil</small></span></label>
                     <label class="slt-pay-option"><input type="radio" name="payment_method" value="ideal"><span><strong>iDEAL</strong><small>Pour les clients néerlandais</small></span></label>
@@ -347,39 +347,45 @@ final class SLT_Core {
         if(is_wp_error($booking_id))wp_die('Could not create booking.',500);
         $data=['name'=>$name,'email'=>$email,'phone'=>sanitize_text_field(wp_unslash($_POST['phone']??'')),'travel_date'=>sanitize_text_field(wp_unslash($_POST['travel_date']??'')),'adults'=>$adults,'children'=>$children,'tour_id'=>$tour_id,'payment_method'=>$method];
         foreach($data as $k=>$v)update_post_meta($booking_id,'_slt_'.$k,$v);
+        $public_token=wp_generate_password(24,false,false);update_post_meta($booking_id,'_slt_public_token',$public_token);
         update_post_meta($booking_id,'_slt_total',$pricing['total']);update_post_meta($booking_id,'_slt_deposit',$pricing['deposit']);
 
         $mode=(string)self::setting('payment_mode','demo');
         if(!$pricing['payable']){
             update_post_meta($booking_id,'_slt_status','pending_price');update_post_meta($booking_id,'_slt_payment_status','not_started');
             self::send_booking_email($booking_id);
-            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'state'=>'pending_price'],home_url('/reservation/')));exit;
+            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'token'=>$public_token,'state'=>'pending_price'],home_url('/reservation/')));exit;
         }
         if($mode==='demo'){
             update_post_meta($booking_id,'_slt_status','payment_pending');update_post_meta($booking_id,'_slt_payment_status','demo');
             self::send_booking_email($booking_id);
-            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'state'=>'demo'],home_url('/reservation/')));exit;
+            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'token'=>$public_token,'state'=>'demo'],home_url('/reservation/')));exit;
         }
 
         $api=(string)self::setting('mollie_api_key','');
         if($api===''){
             update_post_meta($booking_id,'_slt_status','payment_pending');update_post_meta($booking_id,'_slt_payment_status','configuration_required');
-            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'state'=>'configuration_required'],home_url('/reservation/')));exit;
+            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'token'=>$public_token,'state'=>'configuration_required'],home_url('/reservation/')));exit;
         }
 
         $payload=[
             'amount'=>['currency'=>'EUR','value'=>number_format((float)$pricing['deposit'],2,'.','')],
             'description'=>'Acompte réservation #'.$booking_id.' - '.get_the_title($tour_id),
-            'redirectUrl'=>add_query_arg(['booking'=>$booking_id,'state'=>'return'],home_url('/reservation/')),
-            'cancelUrl'=>add_query_arg(['booking'=>$booking_id,'state'=>'cancelled'],home_url('/reservation/')),
+            'redirectUrl'=>add_query_arg(['booking'=>$booking_id,'token'=>$public_token,'state'=>'return'],home_url('/reservation/')),
+            'cancelUrl'=>add_query_arg(['booking'=>$booking_id,'token'=>$public_token,'state'=>'cancelled'],home_url('/reservation/')),
             'webhookUrl'=>rest_url('slt/v1/mollie-webhook'),
             'method'=>$method,
+            'locale'=>'fr_FR',
             'metadata'=>['booking_id'=>$booking_id,'tour_id'=>$tour_id]
         ];
         $payment=self::mollie('POST','payments',$payload);
+        if(is_wp_error($payment)){
+            unset($payload['method']);
+            $payment=self::mollie('POST','payments',$payload);
+        }
         if(is_wp_error($payment)||empty($payment['id'])||empty($payment['_links']['checkout']['href'])){
             update_post_meta($booking_id,'_slt_status','payment_pending');update_post_meta($booking_id,'_slt_payment_status','failed_to_start');
-            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'state'=>'payment_error'],home_url('/reservation/')));exit;
+            wp_safe_redirect(add_query_arg(['booking'=>$booking_id,'token'=>$public_token,'state'=>'payment_error'],home_url('/reservation/')));exit;
         }
         update_post_meta($booking_id,'_slt_mollie_id',sanitize_text_field($payment['id']));
         update_post_meta($booking_id,'_slt_status','payment_pending');update_post_meta($booking_id,'_slt_payment_status',sanitize_text_field($payment['status']??'open'));
@@ -416,8 +422,9 @@ final class SLT_Core {
     }
 
     public static function booking_result(): string {
-        $booking_id=absint($_GET['booking']??0);$state=sanitize_key($_GET['state']??'');
-        if(!$booking_id||get_post_type($booking_id)!=='slt_booking')return '<div class="slt-result"><h2>Votre réservation</h2><p>Utilisez le bouton « Réserver » sur un circuit pour commencer.</p></div>';
+        $booking_id=absint($_GET['booking']??0);$state=sanitize_key($_GET['state']??'');$token=sanitize_text_field(wp_unslash($_GET['token']??''));
+        $stored=$booking_id?(string)get_post_meta($booking_id,'_slt_public_token',true):'';
+        if(!$booking_id||get_post_type($booking_id)!=='slt_booking'||$stored===''||$token===''||!hash_equals($stored,$token))return '<div class="slt-result"><h2>Votre réservation</h2><p>Utilisez le bouton « Réserver » sur un circuit pour commencer.</p></div>';
         $payment_id=(string)get_post_meta($booking_id,'_slt_mollie_id',true);
         if($state==='return'&&$payment_id&&self::setting('payment_mode','demo')==='mollie'){
             $payment=self::mollie('GET','payments/'.rawurlencode($payment_id));
