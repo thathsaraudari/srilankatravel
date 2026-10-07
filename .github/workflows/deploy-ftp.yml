@@ -17,23 +17,23 @@ jobs:
       - name: Deploy SLT plugin
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
+          server: ftpupload.net
+          username: if0_43111316
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
           local-dir: ./wp-content/plugins/slt-core/
-          server-dir: ${{ secrets.FTP_REMOTE_PATH }}wp-content/plugins/slt-core/
+          server-dir: /htdocs/wp-content/plugins/slt-core/
           dangerous-clean-slate: false
 
       - name: Deploy SLT theme
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
+          server: ftpupload.net
+          username: if0_43111316
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
           local-dir: ./wp-content/themes/slt-travel/
-          server-dir: ${{ secrets.FTP_REMOTE_PATH }}wp-content/themes/slt-travel/
+          server-dir: /htdocs/wp-content/themes/slt-travel/
           dangerous-clean-slate: false
