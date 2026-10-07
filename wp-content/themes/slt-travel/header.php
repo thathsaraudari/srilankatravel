@@ -6,5 +6,5 @@
 <a class="brand" href="<?php echo esc_url(home_url('/')); ?>"><span class="brand__mark">SL</span><span><?php bloginfo('name'); ?></span></a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
 <nav id="primary-nav" class="primary-nav"><?php wp_nav_menu(['theme_location'=>'primary','container'=>false,'fallback_cb'=>false]); ?></nav>
-<a class="button button--small header-cta" href="<?php echo esc_url(home_url('/contact/')); ?>">Plan my trip</a>
+<a class="button button--small header-cta" href="<?php echo esc_url(home_url('/contact/')); ?>">Créer mon voyage</a>
 </div></header><main>
