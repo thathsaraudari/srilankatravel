@@ -5,7 +5,7 @@ $itinerary=slt_field('itinerary',$id,[]);$included=slt_field('included',$id,[]);
 $destinations=get_the_terms($id,'slt_destination');
 $fallback_hero=get_template_directory_uri().'/assets/images/hero.webp';
 $fallback_day=get_template_directory_uri().'/assets/images/dambulla.webp'; ?>
-<section class="tour-hero"><div class="tour-hero__image"><?php if(has_post_thumbnail())the_post_thumbnail('full');else:?><img src="<?php echo esc_url($fallback_hero); ?>" alt="Paysage du Sri Lanka"><?php endif; ?></div><div class="tour-hero__overlay"></div>
+<section class="tour-hero"><div class="tour-hero__image"><?php if(has_post_thumbnail()): the_post_thumbnail('full'); else: ?><img src="<?php echo esc_url($fallback_hero); ?>" alt="Paysage du Sri Lanka"><?php endif; ?></div><div class="tour-hero__overlay"></div>
 <div class="container tour-hero__content"><div class="eyebrow eyebrow--light">Circuit privé au Sri Lanka</div><h1><?php the_title(); ?></h1><?php if($tagline): ?><p><?php echo esc_html($tagline); ?></p><?php endif; ?>
 <div class="tour-facts"><?php if($days): ?><span><strong><?php echo esc_html((string)$days); ?></strong> jours</span><?php endif; ?><?php if($nights): ?><span><strong><?php echo esc_html((string)$nights); ?></strong> nuits</span><?php endif; ?><?php if($destinations&&!is_wp_error($destinations)): ?><span><?php echo esc_html(implode(' · ',wp_list_pluck($destinations,'name'))); ?></span><?php endif; ?></div></div></section>
 
