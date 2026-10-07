@@ -50,3 +50,14 @@ jobs:
           local-dir: ./wp-content/themes/slt-travel/
           server-dir: /htdocs/wp-content/themes/slt-travel/
           dangerous-clean-slate: false
+
+      - name: Bootstrap and smoke-test WordPress
+        shell: bash
+        run: |
+          set -e
+          for i in 1 2 3 4; do
+            curl -L --silent --show-error --max-time 30 https://srilankatravel-demo.freehosting.dev/ >/dev/null || true
+            sleep 2
+          done
+          code=$(curl -L --silent --output /dev/null --write-out "%{http_code}" --max-time 30 https://srilankatravel-demo.freehosting.dev/ || true)
+          echo "Homepage HTTP status: $code"
