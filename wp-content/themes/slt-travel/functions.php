@@ -48,7 +48,7 @@ function slt_render_tour_card(int $post_id): void {
     $tagline=(string)slt_field('short_tagline',$post_id,get_the_excerpt($post_id)); ?>
     <article class="tour-card">
         <a class="tour-card__image" href="<?php echo esc_url(get_permalink($post_id)); ?>">
-            <?php if(has_post_thumbnail($post_id)): echo get_the_post_thumbnail($post_id,'large',['loading'=>'lazy']); else: ?><div class="tour-card__placeholder"><span>Sri Lanka</span></div><?php endif; ?>
+            <?php if(has_post_thumbnail($post_id)): echo get_the_post_thumbnail($post_id,'large',['loading'=>'lazy']); else: ?><img src="<?php echo esc_url(get_template_directory_uri().'/assets/images/dambulla.webp'); ?>" alt="<?php echo esc_attr(get_the_title($post_id)); ?>" loading="lazy"><?php endif; ?>
         </a>
         <div class="tour-card__body">
             <?php if($days): ?><div class="eyebrow"><?php echo esc_html($days.' days'); ?></div><?php endif; ?>
