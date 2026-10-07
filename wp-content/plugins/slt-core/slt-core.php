@@ -76,6 +76,7 @@ final class SLT_Core {
         if (in_array($screen->post_type, ['slt_tour','slt_hotel'], true) || $hook === 'toplevel_page_slt-site-settings') {
             wp_enqueue_style('slt-admin', plugin_dir_url(__FILE__).'assets/admin.css', [], '0.2.0');
             if ($screen->post_type === 'slt_tour') {
+                wp_enqueue_media();
                 wp_enqueue_script('slt-admin', plugin_dir_url(__FILE__).'assets/admin.js', [], '0.2.0', true);
             }
         }
@@ -179,6 +180,7 @@ final class SLT_Core {
                 <div class="slt-field"><label>Day</label><input type="number" min="1" name="slt[itinerary][<?php echo esc_attr((string)$i); ?>][day]" value="<?php echo esc_attr((string)($row['day']??'')); ?>"></div>
                 <div class="slt-field"><label>Title</label><input type="text" name="slt[itinerary][<?php echo esc_attr((string)$i); ?>][title]" value="<?php echo esc_attr((string)($row['title']??'')); ?>"></div>
                 <div class="slt-field slt-field--wide"><label>Description</label><textarea rows="6" name="slt[itinerary][<?php echo esc_attr((string)$i); ?>][description]"><?php echo esc_textarea((string)($row['description']??'')); ?></textarea></div>
+                <div class="slt-field slt-field--wide"><label>Photo</label><?php $image_id=(int)($row['image_id']??($row['image']??0)); ?><div class="slt-image-picker"><input type="hidden" class="slt-image-id" name="slt[itinerary][<?php echo esc_attr((string)$i); ?>][image_id]" value="<?php echo esc_attr((string)$image_id); ?>"><div class="slt-image-preview"><?php if($image_id)echo wp_get_attachment_image($image_id,'medium'); ?></div><div><button type="button" class="button slt-choose-image">Choose image</button> <button type="button" class="button-link-delete slt-remove-image" <?php echo $image_id?'':'style="display:none"'; ?>>Remove</button></div></div></div>
                 <div class="slt-field"><label>Hotel</label><select name="slt[itinerary][<?php echo esc_attr((string)$i); ?>][hotel_id]"><option value="">— None —</option><?php foreach($hotels as $hotel): ?><option value="<?php echo esc_attr((string)$hotel->ID); ?>" <?php selected((int)($row['hotel_id']??0),$hotel->ID); ?>><?php echo esc_html($hotel->post_title); ?></option><?php endforeach; ?></select></div>
                 <div class="slt-field"><label>Meals</label><div class="slt-meals"><?php foreach(['breakfast'=>'Breakfast','lunch'=>'Lunch','dinner'=>'Dinner'] as $k=>$v): ?><label><input type="checkbox" name="slt[itinerary][<?php echo esc_attr((string)$i); ?>][meals][]" value="<?php echo esc_attr($k); ?>" <?php checked(in_array($k,$meals,true)); ?>> <?php echo esc_html($v); ?></label><?php endforeach; ?></div></div>
             </div>
@@ -235,7 +237,7 @@ final class SLT_Core {
             $title=sanitize_text_field($row['title']??'');$description=wp_kses_post($row['description']??'');
             if($title===''&&trim(wp_strip_all_tags($description))==='')continue;
             $meals=array_values(array_intersect(['breakfast','lunch','dinner'],array_map('sanitize_key',(array)($row['meals']??[]))));
-            $rows[]=['day'=>max(1,(int)($row['day']??count($rows)+1)),'title'=>$title,'description'=>$description,'hotel_id'=>absint($row['hotel_id']??0),'meals'=>$meals];
+            $rows[]=['day'=>max(1,(int)($row['day']??count($rows)+1)),'title'=>$title,'description'=>$description,'image_id'=>absint($row['image_id']??0),'hotel_id'=>absint($row['hotel_id']??0),'meals'=>$meals];
         }
         update_post_meta($post_id,'itinerary',$rows);
     }
