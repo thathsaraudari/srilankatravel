@@ -37,11 +37,11 @@ function slt_site_option(string $name,$default=null) {
 function slt_price_label(int $post_id): string {
     $basis=slt_field('price_basis',$post_id,'person');
     $price=slt_field('price_from',$post_id,null);
-    if ($basis==='request' || !$price) return __('Price on request','slt-travel');
-    $suffix=['person'=>' / person','couple'=>' / couple','trip'=>' / trip'][$basis]??'';
+    if ($basis==='request' || !$price) return __('Prix sur demande','slt-travel');
+    $suffix=['person'=>' / personne','couple'=>' / couple','trip'=>' / voyage'][$basis]??'';
     $currency=slt_site_option('currency','EUR');
     $symbol=['EUR'=>'€','USD'=>'$','GBP'=>'£'][$currency]??$currency.' ';
-    return sprintf('From %s%s%s',$symbol,number_format_i18n((float)$price,0),$suffix);
+    return sprintf('À partir de %s%s%s',$symbol,number_format_i18n((float)$price,0),$suffix);
 }
 function slt_render_tour_card(int $post_id): void {
     $days=(int)slt_field('duration_days',$post_id,0);
@@ -54,7 +54,7 @@ function slt_render_tour_card(int $post_id): void {
             <?php if($days): ?><div class="eyebrow"><?php echo esc_html($days.' days'); ?></div><?php endif; ?>
             <h3><a href="<?php echo esc_url(get_permalink($post_id)); ?>"><?php echo esc_html(get_the_title($post_id)); ?></a></h3>
             <?php if($tagline): ?><p><?php echo esc_html($tagline); ?></p><?php endif; ?>
-            <div class="tour-card__footer"><strong><?php echo esc_html(slt_price_label($post_id)); ?></strong><a class="text-link" href="<?php echo esc_url(get_permalink($post_id)); ?>">View trip →</a></div>
+            <div class="tour-card__footer"><strong><?php echo esc_html(slt_price_label($post_id)); ?></strong><a class="text-link" href="<?php echo esc_url(get_permalink($post_id)); ?>">Voir le circuit →</a></div>
         </div>
     </article>
 <?php }
