@@ -8,6 +8,7 @@ on:
       - 'wp-content/plugins/slt-core/**'
       - 'wp-content/themes/slt-travel/**'
       - 'wp-content/mu-plugins/**'
+      - 'health/**'
 
 jobs:
   deploy:
@@ -51,6 +52,18 @@ jobs:
           server-dir: /htdocs/wp-content/themes/slt-travel/
           dangerous-clean-slate: false
 
+      - name: Deploy static health probe
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ftpupload.net
+          username: if0_43111316
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./health/
+          server-dir: /htdocs/
+          dangerous-clean-slate: false
+
       - name: Bootstrap and smoke-test WordPress
         shell: bash
         run: |
@@ -59,5 +72,7 @@ jobs:
             curl -L --silent --show-error --max-time 30 https://srilankatravel-demo.freehosting.dev/ >/dev/null || true
             sleep 2
           done
-          code=$(curl -L --silent --output /dev/null --write-out "%{http_code}" --max-time 30 https://srilankatravel-demo.freehosting.dev/ || true)
-          echo "Homepage HTTP status: $code"
+          static_code=$(curl -L --silent --output /dev/null --write-out "%{http_code}" --max-time 30 https://srilankatravel-demo.freehosting.dev/slt-health.txt || true)
+          wp_code=$(curl -L --silent --output /dev/null --write-out "%{http_code}" --max-time 30 https://srilankatravel-demo.freehosting.dev/ || true)
+          echo "Static health HTTP status: $static_code"
+          echo "WordPress homepage HTTP status: $wp_code"
