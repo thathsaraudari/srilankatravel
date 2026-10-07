@@ -12,20 +12,27 @@ function slt_theme_setup(): void {
 add_action('after_setup_theme','slt_theme_setup');
 
 function slt_enqueue_assets(): void {
-    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.1.0');
-    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.1.0',true);
+    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.2.0');
+    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.2.0',true);
 }
 add_action('wp_enqueue_scripts','slt_enqueue_assets');
 
 function slt_field(string $name,$post_id=false,$default=null) {
-    if (!function_exists('get_field')) return $default;
-    $value=get_field($name,$post_id?:false);
+    $id=$post_id ?: get_the_ID();
+    if (function_exists('get_field')) {
+        $value=get_field($name,$id);
+        if ($value!==null && $value!==false && $value!=='') return $value;
+    }
+    $value=get_post_meta((int)$id,$name,true);
     return ($value!==null && $value!==false && $value!=='') ? $value : $default;
 }
 function slt_site_option(string $name,$default=null) {
-    if (!function_exists('get_field')) return $default;
-    $value=get_field($name,'option');
-    return ($value!==null && $value!==false && $value!=='') ? $value : $default;
+    if (function_exists('get_field')) {
+        $value=get_field($name,'option');
+        if ($value!==null && $value!==false && $value!=='') return $value;
+    }
+    $settings=get_option('slt_settings',[]);
+    return array_key_exists($name,$settings) && $settings[$name]!=='' ? $settings[$name] : $default;
 }
 function slt_price_label(int $post_id): string {
     $basis=slt_field('price_basis',$post_id,'person');
@@ -40,7 +47,9 @@ function slt_render_tour_card(int $post_id): void {
     $days=(int)slt_field('duration_days',$post_id,0);
     $tagline=(string)slt_field('short_tagline',$post_id,get_the_excerpt($post_id)); ?>
     <article class="tour-card">
-        <a class="tour-card__image" href="<?php echo esc_url(get_permalink($post_id)); ?>"><?php echo get_the_post_thumbnail($post_id,'large',['loading'=>'lazy']); ?></a>
+        <a class="tour-card__image" href="<?php echo esc_url(get_permalink($post_id)); ?>">
+            <?php if(has_post_thumbnail($post_id)): echo get_the_post_thumbnail($post_id,'large',['loading'=>'lazy']); else: ?><div class="tour-card__placeholder"><span>Sri Lanka</span></div><?php endif; ?>
+        </a>
         <div class="tour-card__body">
             <?php if($days): ?><div class="eyebrow"><?php echo esc_html($days.' days'); ?></div><?php endif; ?>
             <h3><a href="<?php echo esc_url(get_permalink($post_id)); ?>"><?php echo esc_html(get_the_title($post_id)); ?></a></h3>
