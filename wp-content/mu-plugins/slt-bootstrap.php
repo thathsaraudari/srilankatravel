@@ -386,3 +386,34 @@ add_action('init', function (): void {
     update_option('slt_bootstrap_completed_v7_complete_site',1,false);
     flush_rewrite_rules(false);
 },80);
+
+
+/**
+ * V8: seed a working demo price matrix for the sample tour.
+ * These values are examples only and should be replaced with partner rates.
+ */
+add_action('init', function (): void {
+    if (get_option('slt_bootstrap_completed_v8_pricing')) return;
+
+    $tour=get_page_by_title('Découverte du Sri Lanka – 7 jours',OBJECT,'slt_tour');
+    if($tour){
+        $id=(int)$tour->ID;
+        update_post_meta($id,'pricing_mode','matrix');
+        update_post_meta($id,'price_1',1690);
+        update_post_meta($id,'price_2',1290);
+        update_post_meta($id,'price_3_4',1150);
+        update_post_meta($id,'price_5_6',1050);
+        update_post_meta($id,'price_7_plus',990);
+        update_post_meta($id,'child_discount_percent',30);
+        update_post_meta($id,'single_room_supplement',220);
+        update_post_meta($id,'season_start','2026-12-15');
+        update_post_meta($id,'season_end','2027-01-15');
+        update_post_meta($id,'season_surcharge_percent',15);
+        delete_post_meta($id,'deposit_percent_override');
+        update_post_meta($id,'price_from',990);
+        update_post_meta($id,'price_basis','person');
+        update_post_meta($id,'_slt_demo_pricing',1);
+    }
+
+    update_option('slt_bootstrap_completed_v8_pricing',1,false);
+},90);
