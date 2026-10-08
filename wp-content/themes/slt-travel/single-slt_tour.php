@@ -2,7 +2,8 @@
 $id=get_the_ID();$days=(int)slt_field('duration_days',$id,0);$nights=(int)slt_field('duration_nights',$id,max(0,$days-1));
 $tagline=(string)slt_field('short_tagline',$id,get_the_excerpt());$highlights=slt_field('highlights',$id,[]);
 $itinerary=slt_field('itinerary',$id,[]);$included=slt_field('included',$id,[]);$excluded=slt_field('excluded',$id,[]);
-$destinations=get_the_terms($id,'slt_destination'); ?>
+$destinations=get_the_terms($id,'slt_destination');
+$pricing=class_exists('SLT_Core')?SLT_Core::pricing_data($id):[]; ?>
 <section class="tour-hero"><div class="tour-hero__image"><?php if(has_post_thumbnail()): the_post_thumbnail('full'); else: ?><img src="<?php echo esc_url('https://images.unsplash.com/photo-1612862862126-865765df2ded?auto=format&fit=crop&w=2200&q=85'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>"><?php endif; ?></div><div class="tour-hero__overlay"></div>
 <div class="container tour-hero__content"><div class="eyebrow eyebrow--light">Circuit privé au Sri Lanka</div><h1><?php the_title(); ?></h1><?php if($tagline): ?><p><?php echo esc_html($tagline); ?></p><?php endif; ?>
 <div class="tour-facts"><?php if($days): ?><span><strong><?php echo esc_html($days); ?></strong> jours</span><?php endif; ?><?php if($nights): ?><span><strong><?php echo esc_html($nights); ?></strong> nuits</span><?php endif; ?><?php if($destinations&&!is_wp_error($destinations)): ?><span><?php echo esc_html(implode(' · ',wp_list_pluck($destinations,'name'))); ?></span><?php endif; ?></div></div></section>
@@ -36,7 +37,20 @@ else:
 <div class="quote-card__price"><?php echo esc_html(slt_price_label($id)); ?></div>
 <?php if(isset($_GET['enquiry'])&&$_GET['enquiry']==='success'): ?><div class="slt-notice">Votre réservation de démonstration a bien été enregistrée.</div><?php endif; ?>
 <div class="slt-demo-badge">Mode démonstration — aucun paiement réel ne sera débité.</div>
-<form class="slt-booking-demo-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+<form class="slt-booking-demo-form slt-priced-booking" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post"
+data-pricing-mode="<?php echo esc_attr((string)($pricing['mode']??'request')); ?>"
+data-price-1="<?php echo esc_attr((string)($pricing['price_1']??0)); ?>"
+data-price-2="<?php echo esc_attr((string)($pricing['price_2']??0)); ?>"
+data-price-3-4="<?php echo esc_attr((string)($pricing['price_3_4']??0)); ?>"
+data-price-5-6="<?php echo esc_attr((string)($pricing['price_5_6']??0)); ?>"
+data-price-7-plus="<?php echo esc_attr((string)($pricing['price_7_plus']??0)); ?>"
+data-child-discount="<?php echo esc_attr((string)($pricing['child_discount_percent']??0)); ?>"
+data-single-supplement="<?php echo esc_attr((string)($pricing['single_room_supplement']??0)); ?>"
+data-season-start="<?php echo esc_attr((string)($pricing['season_start']??'')); ?>"
+data-season-end="<?php echo esc_attr((string)($pricing['season_end']??'')); ?>"
+data-season-surcharge="<?php echo esc_attr((string)($pricing['season_surcharge_percent']??0)); ?>"
+data-deposit-percent="<?php echo esc_attr((string)($pricing['deposit_percent']??30)); ?>"
+data-currency="<?php echo esc_attr((string)($pricing['currency']??'EUR')); ?>">
 <input type="hidden" name="action" value="slt_submit_enquiry">
 <input type="hidden" name="tour_id" value="<?php echo esc_attr((string)$id); ?>">
 <input type="hidden" name="message" class="slt-booking-message" value="Réservation démo — moyen de paiement souhaité : Wero">
@@ -47,7 +61,14 @@ else:
 <label>Date de départ<input type="date" name="travel_date" required></label>
 <label>Adultes<input type="number" name="adults" min="1" value="2" required></label>
 <label>Enfants<input type="number" name="children" min="0" value="0"></label>
+<label>Chambres individuelles<input type="number" name="single_rooms" min="0" value="0"><small>Supplément appliqué par chambre individuelle.</small></label>
 <label>Téléphone<input name="phone" autocomplete="tel"></label>
+</div>
+<div class="slt-live-price" aria-live="polite">
+  <div class="slt-live-price__row"><span>Prix total</span><strong data-slt-total>—</strong></div>
+  <div class="slt-live-price__detail"><span data-slt-rate-note>Renseignez vos voyageurs pour calculer le prix.</span></div>
+  <div class="slt-live-price__row slt-live-price__deposit"><span>Acompte à la réservation</span><strong data-slt-deposit>—</strong></div>
+  <div class="slt-live-price__season" data-slt-season hidden>Supplément haute saison inclus.</div>
 </div>
 <fieldset class="slt-payment-methods"><legend>Moyen de paiement souhaité</legend>
 <label class="slt-pay-option slt-pay-option--featured"><input type="radio" name="preferred_payment_method" value="Wero" checked><span><strong>Wero</strong><small>Paiement bancaire européen, si disponible</small></span></label>
