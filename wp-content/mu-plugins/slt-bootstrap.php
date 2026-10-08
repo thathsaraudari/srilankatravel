@@ -417,3 +417,57 @@ add_action('init', function (): void {
 
     update_option('slt_bootstrap_completed_v8_pricing',1,false);
 },90);
+
+
+/**
+ * V9: configure concrete demo selling prices for the sample 7-day tour.
+ * Replace with contracted DMC/supplier rates before accepting real payments.
+ */
+add_action('init', function (): void {
+    if (get_option('slt_bootstrap_completed_v9_prices')) return;
+
+    $tour=get_page_by_title('Découverte du Sri Lanka – 7 jours',OBJECT,'slt_tour');
+    if(!$tour){
+        $candidates=get_posts([
+            'post_type'=>'slt_tour',
+            'post_status'=>'publish',
+            'posts_per_page'=>1,
+            'orderby'=>'date',
+            'order'=>'ASC'
+        ]);
+        $tour=$candidates[0]??null;
+    }
+
+    if($tour){
+        $id=(int)$tour->ID;
+
+        // Demo retail prices per traveller, decreasing with group size.
+        update_post_meta($id,'pricing_mode','matrix');
+        update_post_meta($id,'price_1',1590);
+        update_post_meta($id,'price_2',1190);
+        update_post_meta($id,'price_3_4',1040);
+        update_post_meta($id,'price_5_6',940);
+        update_post_meta($id,'price_7_plus',875);
+
+        // Family / room rules.
+        update_post_meta($id,'child_discount_percent',25);
+        update_post_meta($id,'single_room_supplement',195);
+
+        // Peak season example.
+        update_post_meta($id,'season_start','2026-12-15');
+        update_post_meta($id,'season_end','2027-01-15');
+        update_post_meta($id,'season_surcharge_percent',12);
+
+        // Per-tour deposit override.
+        update_post_meta($id,'deposit_percent_override',30);
+
+        // Public card/archive price.
+        update_post_meta($id,'price_from',875);
+        update_post_meta($id,'price_basis','person');
+
+        // Keep the admin warning visible until real partner rates replace these.
+        update_post_meta($id,'_slt_demo_pricing',1);
+    }
+
+    update_option('slt_bootstrap_completed_v9_prices',1,false);
+},95);
