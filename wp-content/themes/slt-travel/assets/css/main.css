@@ -62,3 +62,14 @@
 .booking-card .slt-checkbox{display:flex!important;align-items:flex-start!important;gap:10px!important;font-size:.78rem!important;line-height:1.4!important;margin:14px 0 16px!important}
 .booking-card .slt-checkbox input[type="checkbox"]{width:18px!important;height:18px!important;min-width:18px!important;flex:0 0 18px!important;margin:2px 0 0!important;padding:0!important;border-radius:4px!important}
 .booking-card .slt-checkbox span{display:block;min-width:0}
+
+/* Live tour pricing */
+.slt-live-price{margin:18px 0 20px;padding:17px 16px;border:1px solid #cfded6;border-radius:14px;background:#f4faf7}
+.slt-live-price__row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.slt-live-price__row span{font-size:.78rem;font-weight:800;color:#40534b}
+.slt-live-price__row strong{font-family:Georgia,serif;font-size:1.45rem;color:var(--forest);white-space:nowrap}
+.slt-live-price__detail{padding:8px 0 12px;font-size:.72rem;color:var(--muted);border-bottom:1px solid #dbe7e1}
+.slt-live-price__deposit{padding-top:12px}
+.slt-live-price__deposit strong{font-size:1.05rem}
+.slt-live-price__season{margin-top:9px;padding:7px 9px;border-radius:8px;background:#fff3cd;color:#725b12;font-size:.7rem;font-weight:700}
+.slt-booking-demo-form label small{font-size:.68rem;line-height:1.35;color:var(--muted);font-weight:500}
