@@ -471,3 +471,208 @@ add_action('init', function (): void {
 
     update_option('slt_bootstrap_completed_v9_prices',1,false);
 },95);
+
+
+/**
+ * V10: build out the demo tour catalogue.
+ * All prices are illustrative demo rates until replaced by contracted partner rates.
+ */
+add_action('init', function (): void {
+    if (get_option('slt_bootstrap_completed_v10_tour_catalog')) return;
+
+    $term_ids=function(string $taxonomy,array $names): array {
+        $ids=[];
+        foreach($names as $name){
+            $term=term_exists($name,$taxonomy);
+            if(!$term)$term=wp_insert_term($name,$taxonomy);
+            if(!is_wp_error($term))$ids[]=(int)(is_array($term)?$term['term_id']:$term);
+        }
+        return $ids;
+    };
+
+    $packages=[
+        [
+            'title'=>'Sri Lanka Classique – 10 jours',
+            'slug'=>'sri-lanka-classique-10-jours',
+            'days'=>10,'nights'=>9,'from'=>1090,
+            'tagline'=>'Le Triangle culturel, Kandy, les plantations de thé, Ella et la côte sud dans un grand classique équilibré.',
+            'content'=>'<p>Un premier voyage idéal au Sri Lanka : patrimoine ancien, collines verdoyantes, train panoramique, nature et quelques jours au bord de l’océan Indien.</p><p>L’itinéraire peut être adapté selon votre rythme et les disponibilités.</p>',
+            'image'=>'https://images.unsplash.com/photo-1612862862126-865765df2ded?auto=format&fit=crop&w=1400&q=82',
+            'destinations'=>['Negombo','Sigiriya','Dambulla','Kandy','Nuwara Eliya','Ella','Yala','Galle'],
+            'styles'=>['Culture','Nature','Pays du thé','Plage'],
+            'pricing'=>[1990,1490,1320,1190,1090,25,235],
+            'highlights'=>['Sigiriya et Dambulla','Temple de la Dent à Kandy','Plantations de thé','Train vers Ella','Safari à Yala','Fort de Galle'],
+            'itinerary'=>[
+                ['Arrivée → Negombo','Accueil à l’aéroport et première nuit près de la côte pour récupérer du voyage.'],
+                ['Negombo → Sigiriya','Route vers le Triangle culturel et installation dans la région de Sigiriya.'],
+                ['Sigiriya & Dambulla','Ascension de Sigiriya puis découverte des temples troglodytes de Dambulla.'],
+                ['Sigiriya → Kandy','Route vers Kandy avec arrêt dans la région de Matale.'],
+                ['Kandy','Temple de la Dent, marché local et découverte de la ville autour du lac.'],
+                ['Kandy → Nuwara Eliya','Route panoramique via les plantations et fabriques de thé.'],
+                ['Nuwara Eliya → Ella','Voyage vers Ella, avec trajet ferroviaire panoramique selon disponibilité.'],
+                ['Ella → Yala','Matinée dans les montagnes puis route vers la région de Yala.'],
+                ['Yala → Galle','Safari tôt le matin puis route vers la côte et le fort historique de Galle.'],
+                ['Galle → Aéroport','Derniers moments sur la côte avant le transfert vers l’aéroport.'],
+            ],
+        ],
+        [
+            'title'=>'Sri Lanka en Famille – 12 jours',
+            'slug'=>'sri-lanka-en-famille-12-jours',
+            'days'=>12,'nights'=>11,'from'=>1220,
+            'tagline'=>'Un rythme plus doux, des animaux, des plages et des étapes adaptées aux familles avec enfants.',
+            'content'=>'<p>Un circuit pensé pour voyager avec des enfants : moins de longues journées, davantage de pauses et une combinaison d’animaux, de nature, de culture et de plage.</p>',
+            'image'=>'https://images.unsplash.com/photo-1586193804147-64d5c02ef9c1?auto=format&fit=crop&w=1400&q=82',
+            'destinations'=>['Negombo','Habarana','Sigiriya','Kandy','Nuwara Eliya','Ella','Udawalawe','Bentota'],
+            'styles'=>['Famille','Safari','Nature','Plage'],
+            'pricing'=>[2290,1690,1490,1340,1220,35,260],
+            'highlights'=>['Éléphants sauvages','Rythme adapté aux enfants','Train des montagnes','Safari à Udawalawe','Temps libre à la plage','Activités flexibles'],
+            'itinerary'=>[
+                ['Arrivée → Negombo','Accueil et installation pour une première journée légère.'],
+                ['Negombo → Habarana','Départ vers le centre du pays avec pauses en cours de route.'],
+                ['Sigiriya','Visite de Sigiriya à un rythme adapté à la famille.'],
+                ['Safari & village','Safari dans un parc de la région et découverte de la campagne.'],
+                ['Habarana → Kandy','Route vers Kandy via Matale.'],
+                ['Kandy','Visite culturelle et après-midi plus libre.'],
+                ['Kandy → Nuwara Eliya','Découverte des plantations de thé et du climat des montagnes.'],
+                ['Nuwara Eliya → Ella','Route ou train panoramique selon disponibilité.'],
+                ['Ella','Journée détendue autour d’Ella avec promenades faciles.'],
+                ['Ella → Udawalawe','Route vers Udawalawe et safari en fin de journée ou le lendemain matin.'],
+                ['Udawalawe → Bentota','Départ vers la côte pour profiter de la plage.'],
+                ['Bentota → Aéroport','Matinée libre puis transfert à l’aéroport.'],
+            ],
+        ],
+        [
+            'title'=>'Safari & Plages – 9 jours',
+            'slug'=>'safari-plages-sri-lanka-9-jours',
+            'days'=>9,'nights'=>8,'from'=>1030,
+            'tagline'=>'Éléphants, léopards, mangroves et plages tropicales pour un voyage centré sur la nature.',
+            'content'=>'<p>Un itinéraire pour ceux qui veulent consacrer une grande partie du séjour à la faune sauvage et terminer par la côte sud.</p>',
+            'image'=>'https://images.unsplash.com/photo-1566650576880-6740b03eaad1?auto=format&fit=crop&w=1400&q=82',
+            'destinations'=>['Habarana','Kaudulla','Kandy','Ella','Yala','Mirissa','Galle'],
+            'styles'=>['Safari','Animaux','Nature','Plage'],
+            'pricing'=>[1850,1390,1240,1120,1030,25,210],
+            'highlights'=>['Safari éléphants','Montagnes d’Ella','Parc national de Yala','Côte de Mirissa','Fort de Galle','Mangroves et nature'],
+            'itinerary'=>[
+                ['Arrivée → Habarana','Accueil et route vers le centre du pays.'],
+                ['Safari à Kaudulla','Matinée libre puis safari à la recherche des troupeaux d’éléphants.'],
+                ['Habarana → Kandy','Route vers Kandy et découverte de la ville.'],
+                ['Kandy → Ella','Traversée des montagnes et paysages de thé.'],
+                ['Ella','Randonnée légère et points de vue autour d’Ella.'],
+                ['Ella → Yala','Route vers le sud-est et préparation du safari.'],
+                ['Safari à Yala → Mirissa','Safari matinal puis départ vers la côte.'],
+                ['Mirissa & Galle','Plage et découverte de Galle selon vos envies.'],
+                ['Côte → Aéroport','Temps libre avant le transfert retour.'],
+            ],
+        ],
+        [
+            'title'=>'Lune de miel au Sri Lanka – 8 jours',
+            'slug'=>'lune-de-miel-sri-lanka-8-jours',
+            'days'=>8,'nights'=>7,'from'=>1150,
+            'tagline'=>'Hôtels de charme, montagnes, expériences privées et plage pour un voyage romantique.',
+            'content'=>'<p>Une semaine romantique mêlant paysages iconiques, hébergements de charme, expériences à deux et fin de séjour au bord de l’océan.</p>',
+            'image'=>'https://images.unsplash.com/photo-1589373797397-d19670f47549?auto=format&fit=crop&w=1400&q=82',
+            'destinations'=>['Sigiriya','Kandy','Nuwara Eliya','Ella','Bentota'],
+            'styles'=>['Lune de miel','Romantique','Pays du thé','Plage'],
+            'pricing'=>[1850,1450,1320,1220,1150,20,290],
+            'highlights'=>['Coucher de soleil à Sigiriya','Hôtels de charme','Tea country','Train panoramique','Dîner romantique','Plage en fin de séjour'],
+            'itinerary'=>[
+                ['Arrivée → Sigiriya','Accueil privé et route vers le Triangle culturel.'],
+                ['Sigiriya','Découverte de Sigiriya et temps libre dans un cadre tropical.'],
+                ['Sigiriya → Kandy','Route vers Kandy avec une étape culturelle.'],
+                ['Kandy → Nuwara Eliya','Paysages de montagne, cascades et plantations de thé.'],
+                ['Nuwara Eliya → Ella','Trajet panoramique et arrivée à Ella.'],
+                ['Ella → Bentota','Route vers la côte pour une fin de séjour relaxante.'],
+                ['Bentota','Journée libre entre plage, spa et activités optionnelles.'],
+                ['Bentota → Aéroport','Transfert privé selon l’horaire du vol.'],
+            ],
+        ],
+        [
+            'title'=>'Grand Tour du Sri Lanka – 14 jours',
+            'slug'=>'grand-tour-sri-lanka-14-jours',
+            'days'=>14,'nights'=>13,'from'=>1610,
+            'tagline'=>'Deux semaines pour explorer le Sri Lanka en profondeur, du Triangle culturel aux montagnes et à la côte.',
+            'content'=>'<p>Notre itinéraire le plus complet : anciennes capitales, safaris, Kandy, hautes terres, Ella, parcs nationaux et plusieurs jours sur la côte.</p>',
+            'image'=>'https://images.unsplash.com/photo-1598955890270-d77cdb06d2bb?auto=format&fit=crop&w=1400&q=82',
+            'destinations'=>['Negombo','Anuradhapura','Sigiriya','Polonnaruwa','Kandy','Nuwara Eliya','Ella','Yala','Mirissa','Galle','Bentota'],
+            'styles'=>['Grand tour','Culture','Safari','Nature','Plage'],
+            'pricing'=>[2850,2190,1950,1760,1610,25,320],
+            'highlights'=>['Anuradhapura','Polonnaruwa','Sigiriya','Kandy','Train des montagnes','Yala','Galle','Plages du sud'],
+            'itinerary'=>[
+                ['Arrivée → Negombo','Accueil à l’aéroport et première nuit tranquille.'],
+                ['Negombo → Anuradhapura','Route vers l’ancienne capitale.'],
+                ['Anuradhapura → Sigiriya','Visite des principaux sites puis départ vers Sigiriya.'],
+                ['Polonnaruwa','Excursion vers les ruines de Polonnaruwa.'],
+                ['Sigiriya','Forteresse de Sigiriya et temps libre dans la région.'],
+                ['Sigiriya → Kandy','Route vers Kandy via Matale.'],
+                ['Kandy','Temple de la Dent et découverte de la ville.'],
+                ['Kandy → Nuwara Eliya','Route des plantations et découverte du thé.'],
+                ['Nuwara Eliya → Ella','Traversée panoramique des hautes terres.'],
+                ['Ella','Journée consacrée aux paysages et promenades autour d’Ella.'],
+                ['Ella → Yala','Route vers le parc national de Yala.'],
+                ['Yala → Mirissa','Safari matinal puis route vers la côte sud.'],
+                ['Mirissa → Galle → Bentota','Découverte du fort de Galle et continuation le long de la côte.'],
+                ['Bentota → Aéroport','Temps libre puis transfert retour.'],
+            ],
+        ],
+    ];
+
+    foreach($packages as $pkg){
+        $existing=get_page_by_path($pkg['slug'],OBJECT,'slt_tour');
+        $post_data=[
+            'post_type'=>'slt_tour','post_status'=>'publish','post_title'=>$pkg['title'],
+            'post_name'=>$pkg['slug'],'post_excerpt'=>$pkg['tagline'],'post_content'=>$pkg['content']
+        ];
+        if($existing)$post_data['ID']=$existing->ID;
+        $tour_id=$existing?wp_update_post($post_data,true):wp_insert_post($post_data,true);
+        if(is_wp_error($tour_id)||!$tour_id)continue;
+
+        update_post_meta($tour_id,'duration_days',$pkg['days']);
+        update_post_meta($tour_id,'duration_nights',$pkg['nights']);
+        update_post_meta($tour_id,'short_tagline',$pkg['tagline']);
+        update_post_meta($tour_id,'featured',1);
+        update_post_meta($tour_id,'demo_image_url',$pkg['image']);
+        update_post_meta($tour_id,'pricing_mode','matrix');
+        update_post_meta($tour_id,'price_1',$pkg['pricing'][0]);
+        update_post_meta($tour_id,'price_2',$pkg['pricing'][1]);
+        update_post_meta($tour_id,'price_3_4',$pkg['pricing'][2]);
+        update_post_meta($tour_id,'price_5_6',$pkg['pricing'][3]);
+        update_post_meta($tour_id,'price_7_plus',$pkg['pricing'][4]);
+        update_post_meta($tour_id,'child_discount_percent',$pkg['pricing'][5]);
+        update_post_meta($tour_id,'single_room_supplement',$pkg['pricing'][6]);
+        update_post_meta($tour_id,'deposit_percent_override',30);
+        update_post_meta($tour_id,'season_start','2026-12-15');
+        update_post_meta($tour_id,'season_end','2027-01-15');
+        update_post_meta($tour_id,'season_surcharge_percent',12);
+        update_post_meta($tour_id,'price_from',$pkg['from']);
+        update_post_meta($tour_id,'price_basis','person');
+        update_post_meta($tour_id,'_slt_demo_pricing',1);
+
+        update_post_meta($tour_id,'highlights',array_map(fn($text)=>['text'=>$text],$pkg['highlights']));
+        $itinerary=[];
+        foreach($pkg['itinerary'] as $i=>$day){
+            $itinerary[]=[
+                'day'=>$i+1,'title'=>$day[0],'description'=>$day[1],
+                'image_id'=>0,'hotel_id'=>0,
+                'meals'=>$i===0?['dinner']:($i===count($pkg['itinerary'])-1?['breakfast']:['breakfast','dinner'])
+            ];
+        }
+        update_post_meta($tour_id,'itinerary',$itinerary);
+        update_post_meta($tour_id,'included',[
+            ['item'=>'Transport privé selon le programme confirmé'],
+            ['item'=>'Hébergements selon la catégorie confirmée'],
+            ['item'=>'Les repas indiqués dans l’itinéraire'],
+            ['item'=>'Organisation locale des étapes et activités confirmées'],
+        ]);
+        update_post_meta($tour_id,'excluded',[
+            ['item'=>'Vols internationaux'],
+            ['item'=>'Visa et assurance voyage'],
+            ['item'=>'Dépenses personnelles et activités non confirmées'],
+        ]);
+
+        wp_set_object_terms($tour_id,$term_ids('slt_destination',$pkg['destinations']),'slt_destination');
+        wp_set_object_terms($tour_id,$term_ids('slt_travel_style',$pkg['styles']),'slt_travel_style');
+    }
+
+    update_option('slt_bootstrap_completed_v10_tour_catalog',1,false);
+    flush_rewrite_rules(false);
+},100);
