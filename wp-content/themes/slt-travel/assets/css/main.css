@@ -73,3 +73,11 @@
 .slt-live-price__deposit strong{font-size:1.05rem}
 .slt-live-price__season{margin-top:9px;padding:7px 9px;border-radius:8px;background:#fff3cd;color:#725b12;font-size:.7rem;font-weight:700}
 .slt-booking-demo-form label small{font-size:.68rem;line-height:1.35;color:var(--muted);font-weight:500}
+
+/* Language switcher */
+.language-switcher{display:flex;align-items:center;margin-left:2px}
+.language-switcher select{appearance:none;border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 28px 8px 11px;font:inherit;font-size:.75rem;font-weight:800;color:var(--ink);cursor:pointer}
+.language-switcher select:focus{outline:2px solid rgba(186,107,53,.28);outline-offset:2px}
+@media(max-width:1050px){.language-switcher{margin-left:auto}.header-cta{display:none}}
+@media(max-width:900px){.language-switcher{order:2;margin-left:auto}.nav-toggle{order:3}.primary-nav{order:4}.brand{order:1}}
+@media(max-width:640px){.language-switcher select{padding:7px 9px;font-size:.7rem}.brand__logo--wide{width:155px!important}}
