@@ -27,6 +27,7 @@ final class SLT_Core {
         add_shortcode('slt_enquiry_form', [__CLASS__, 'form']);
         add_action('admin_post_nopriv_slt_submit_enquiry', [__CLASS__, 'submit']);
         add_action('admin_post_slt_submit_enquiry', [__CLASS__, 'submit']);
+        add_action('admin_post_slt_translate_all_tours', [__CLASS__, 'translate_all_tours']);
     }
 
     public static function content(): void {
@@ -124,7 +125,16 @@ final class SLT_Core {
             </select></div>
             <div class="slt-field"><label for="deepl_api_key">DeepL API Free key</label><input id="deepl_api_key" type="password" autocomplete="off" name="slt_settings[deepl_api_key]" value="<?php echo esc_attr((string)($s['deepl_api_key']??'')); ?>" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx"><small>Optional. Used only in WordPress admin to generate saved EN / DE / NL / ES tour translations.</small></div>
             <div class="slt-field slt-field--wide"><label for="company_details">Company details</label><textarea id="company_details" rows="5" name="slt_settings[company_details]"><?php echo esc_textarea($s['company_details']??''); ?></textarea></div>
-        </div><?php submit_button('Save settings'); ?></form></div>
+        </div><?php submit_button('Save settings'); ?></form>
+        <?php if(!empty($s['deepl_api_key'])): ?>
+        <hr><h2>Tour translations</h2><p>Generate and store English, German, Dutch and Spanish versions for every published tour. Existing translations will be refreshed.</p>
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+            <input type="hidden" name="action" value="slt_translate_all_tours">
+            <?php wp_nonce_field('slt_translate_all_tours','slt_translate_nonce'); ?>
+            <?php submit_button('Generate translations for all tours','secondary','submit',false); ?>
+        </form>
+        <?php endif; ?>
+        </div>
     }
 
     private static function setting_input(string $key,string $label,string $type,array $s): void { ?>
@@ -414,6 +424,20 @@ final class SLT_Core {
         update_post_meta($post_id,'_slt_quote_amount',max(0,(float)($s['quote_amount']??0)));
         update_post_meta($post_id,'_slt_payment_link',esc_url_raw($s['payment_link']??''));
         update_post_meta($post_id,'_slt_internal_notes',sanitize_textarea_field($s['internal_notes']??''));
+    }
+
+    public static function translate_all_tours(): void {
+        if(!current_user_can('manage_options')) wp_die('Not allowed.',403);
+        if(!isset($_POST['slt_translate_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['slt_translate_nonce'])),'slt_translate_all_tours')) wp_die('Invalid request.',403);
+        $ids=get_posts(['post_type'=>'slt_tour','post_status'=>['publish','draft'],'posts_per_page'=>-1,'fields'=>'ids']);
+        $translated=0;$failed=0;
+        foreach($ids as $tour_id){
+            $result=self::generate_tour_translations((int)$tour_id);
+            if(is_wp_error($result)){$failed++;update_post_meta((int)$tour_id,'_slt_translation_error',$result->get_error_message());}
+            else{$translated++;delete_post_meta((int)$tour_id,'_slt_translation_error');}
+        }
+        wp_safe_redirect(add_query_arg(['page'=>'slt-site-settings','translated'=>$translated,'failed'=>$failed],admin_url('admin.php')));
+        exit;
     }
 
     public static function tour_columns(array $columns): array {
