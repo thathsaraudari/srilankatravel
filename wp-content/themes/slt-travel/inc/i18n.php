@@ -139,6 +139,8 @@ function slt_translated_post_value(int $post_id,string $field,$fallback) {
     if (!$post) return $fallback;
     $group=$post->post_type==='slt_tour'?'tours':($post->post_type==='page'?'pages':'');
     if ($group==='') return $fallback;
+    $stored=get_post_meta($post_id,'_slt_i18n',true);
+    if(is_array($stored) && isset($stored[$lang]) && array_key_exists($field,$stored[$lang])) return $stored[$lang][$field];
     $data=slt_content_translations();
     return $data[$group][$post->post_name][$lang][$field]??$fallback;
 }

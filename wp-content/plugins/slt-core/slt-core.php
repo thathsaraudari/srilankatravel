@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SLT Core
  * Description: Travel package content model, admin editor, settings and enquiry handling for the Sri Lanka Travel site.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  */
@@ -101,6 +101,7 @@ final class SLT_Core {
             'currency'=>in_array(($value['currency']??'EUR'),['EUR','USD','GBP'],true)?$value['currency']:'EUR',
             'deposit_percent'=>min(100,max(0,(int)($value['deposit_percent']??30))),
             'payment_mode'=>in_array(($value['payment_mode']??'enquiry'),['enquiry','woocommerce'],true)?$value['payment_mode']:'enquiry',
+            'deepl_api_key'=>sanitize_text_field($value['deepl_api_key']??''),
             'company_details'=>sanitize_textarea_field($value['company_details']??'')
         ];
     }
@@ -121,6 +122,7 @@ final class SLT_Core {
                 <option value="enquiry" <?php selected($s['payment_mode']??'enquiry','enquiry'); ?>>Enquiry / quote only</option>
                 <option value="woocommerce" <?php selected($s['payment_mode']??'enquiry','woocommerce'); ?>>WooCommerce checkout</option>
             </select></div>
+            <div class="slt-field"><label for="deepl_api_key">DeepL API Free key</label><input id="deepl_api_key" type="password" autocomplete="off" name="slt_settings[deepl_api_key]" value="<?php echo esc_attr((string)($s['deepl_api_key']??'')); ?>" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx"><small>Optional. Used only in WordPress admin to generate saved EN / DE / NL / ES tour translations.</small></div>
             <div class="slt-field slt-field--wide"><label for="company_details">Company details</label><textarea id="company_details" rows="5" name="slt_settings[company_details]"><?php echo esc_textarea($s['company_details']??''); ?></textarea></div>
         </div><?php submit_button('Save settings'); ?></form></div>
     }
@@ -187,6 +189,24 @@ final class SLT_Core {
                 <div class="slt-field"><label>High-season end</label><input type="date" name="slt[season_end]" value="<?php echo esc_attr($season_end); ?>"></div>
                 <div class="slt-field"><label>High-season surcharge (%)</label><input type="number" min="0" max="200" step="1" name="slt[season_surcharge_percent]" value="<?php echo esc_attr((string)$season_surcharge); ?>"></div>
             </div>
+        </div>
+
+        <div class="slt-admin-section">
+            <div class="slt-admin-section__head"><div><h3>Translations</h3><p>French is the source. Generated translations are stored with this tour and reused on the public site.</p></div></div>
+            <?php
+            $translations=get_post_meta($post->ID,'_slt_i18n',true);
+            $translations=is_array($translations)?$translations:[];
+            $translation_error=(string)get_post_meta($post->ID,'_slt_translation_error',true);
+            $deepl_ready=(bool)self::setting('deepl_api_key','');
+            ?>
+            <?php if($translation_error): ?><div class="notice notice-error inline"><p><?php echo esc_html($translation_error); ?></p></div><?php endif; ?>
+            <?php if(!$deepl_ready): ?><div class="notice notice-warning inline"><p>Add a free DeepL API key under <strong>Site Settings</strong> to generate translations automatically when saving tours.</p></div><?php endif; ?>
+            <div class="slt-translation-status">
+                <?php foreach(['en'=>'English','de'=>'Deutsch','nl'=>'Nederlands','es'=>'Español'] as $code=>$label): ?>
+                    <span class="slt-translation-chip <?php echo !empty($translations[$code])?'is-ready':''; ?>"><?php echo esc_html($label); ?> <?php echo !empty($translations[$code])?'✓':'—'; ?></span>
+                <?php endforeach; ?>
+            </div>
+            <label class="slt-inline-check"><input type="checkbox" name="slt[generate_translations]" value="1" <?php checked($deepl_ready); ?>> Generate / refresh EN, DE, NL and ES translations when this tour is saved</label>
         </div>
 
         <div class="slt-admin-section"><div class="slt-admin-section__head"><div><h3>Itinerary</h3><p>Add, remove or reorder the days of this package.</p></div><button type="button" class="button button-secondary" id="slt-add-day">Add day</button></div>
@@ -291,6 +311,85 @@ final class SLT_Core {
             $rows[]=['day'=>max(1,(int)($row['day']??count($rows)+1)),'title'=>$title,'description'=>$description,'image_id'=>absint($row['image_id']??0),'hotel_id'=>absint($row['hotel_id']??0),'meals'=>$meals];
         }
         update_post_meta($post_id,'itinerary',$rows);
+
+        if(!empty($s['generate_translations']) && self::setting('deepl_api_key','')){
+            $result=self::generate_tour_translations($post_id);
+            if(is_wp_error($result)) update_post_meta($post_id,'_slt_translation_error',$result->get_error_message());
+            else delete_post_meta($post_id,'_slt_translation_error');
+        }
+    }
+
+    private static function generate_tour_translations(int $post_id) {
+        $key=(string)self::setting('deepl_api_key','');
+        if($key==='') return new WP_Error('slt_no_deepl_key','DeepL API key is not configured.');
+
+        $post=get_post($post_id);
+        if(!$post) return new WP_Error('slt_no_tour','Tour not found.');
+
+        $highlights=self::as_array(get_post_meta($post_id,'highlights',true));
+        $itinerary=self::as_array(get_post_meta($post_id,'itinerary',true));
+        $included=self::as_array(get_post_meta($post_id,'included',true));
+        $excluded=self::as_array(get_post_meta($post_id,'excluded',true));
+
+        $source=[
+            (string)$post->post_title,
+            (string)get_post_meta($post_id,'short_tagline',true),
+            (string)$post->post_content,
+        ];
+        foreach($highlights as $row)$source[]=(string)($row['text']??'');
+        foreach($itinerary as $row){$source[]=(string)($row['title']??'');$source[]=(string)($row['description']??'');}
+        foreach($included as $row)$source[]=(string)($row['item']??'');
+        foreach($excluded as $row)$source[]=(string)($row['item']??'');
+
+        $targets=['en'=>'EN-GB','de'=>'DE','nl'=>'NL','es'=>'ES'];
+        $all=[];
+        foreach($targets as $code=>$target){
+            $translated=self::deepl_translate($source,$target,$key);
+            if(is_wp_error($translated)) return $translated;
+            $i=0;
+            $lang=[
+                'title'=>$translated[$i++]??$post->post_title,
+                'short_tagline'=>$translated[$i++]??get_post_meta($post_id,'short_tagline',true),
+                'content'=>$translated[$i++]??$post->post_content,
+            ];
+            $lang['highlights']=[];
+            foreach($highlights as $row){$copy=is_array($row)?$row:[];$copy['text']=$translated[$i++]??($row['text']??'');$lang['highlights'][]=$copy;}
+            $lang['itinerary']=[];
+            foreach($itinerary as $row){$copy=is_array($row)?$row:[];$copy['title']=$translated[$i++]??($row['title']??'');$copy['description']=$translated[$i++]??($row['description']??'');$lang['itinerary'][]=$copy;}
+            $lang['included']=[];
+            foreach($included as $row){$copy=is_array($row)?$row:[];$copy['item']=$translated[$i++]??($row['item']??'');$lang['included'][]=$copy;}
+            $lang['excluded']=[];
+            foreach($excluded as $row){$copy=is_array($row)?$row:[];$copy['item']=$translated[$i++]??($row['item']??'');$lang['excluded'][]=$copy;}
+            $all[$code]=$lang;
+        }
+        update_post_meta($post_id,'_slt_i18n',$all);
+        update_post_meta($post_id,'_slt_i18n_updated_at',current_time('mysql'));
+        return true;
+    }
+
+    private static function deepl_translate(array $texts,string $target,string $key) {
+        if(!$texts) return [];
+        $parts=[];
+        foreach($texts as $text)$parts[]='text='.rawurlencode((string)$text);
+        $parts[]='source_lang=FR';
+        $parts[]='target_lang='.rawurlencode($target);
+        $parts[]='tag_handling=html';
+        $response=wp_remote_post('https://api-free.deepl.com/v2/translate',[
+            'timeout'=>30,
+            'headers'=>[
+                'Authorization'=>'DeepL-Auth-Key '.$key,
+                'Content-Type'=>'application/x-www-form-urlencoded',
+            ],
+            'body'=>implode('&',$parts),
+        ]);
+        if(is_wp_error($response)) return $response;
+        $status=(int)wp_remote_retrieve_response_code($response);
+        $body=json_decode((string)wp_remote_retrieve_body($response),true);
+        if($status<200||$status>=300||!is_array($body)||empty($body['translations'])){
+            $message=is_array($body)&&!empty($body['message'])?(string)$body['message']:'DeepL translation request failed.';
+            return new WP_Error('slt_deepl_error',$message);
+        }
+        return array_map(fn($row)=>(string)($row['text']??''),(array)$body['translations']);
     }
 
     public static function save_hotel(int $post_id): void {
