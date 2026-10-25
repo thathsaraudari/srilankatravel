@@ -147,7 +147,17 @@ function slt_translated_post_value(int $post_id,string $field,$fallback) {
 
 function slt_translate_tour_field(string $field,int $post_id,$fallback) {
     if (!in_array($field,['short_tagline','highlights','itinerary','included','excluded'],true)) return $fallback;
-    return slt_translated_post_value($post_id,$field,$fallback);
+    $translated=slt_translated_post_value($post_id,$field,$fallback);
+    if(is_array($fallback) && is_array($translated) && in_array($field,['highlights','itinerary','included','excluded'],true)){
+        $merged=[];
+        foreach($fallback as $i=>$row){
+            $base=is_array($row)?$row:[];
+            $overlay=isset($translated[$i])&&is_array($translated[$i])?$translated[$i]:[];
+            $merged[]=array_merge($base,$overlay);
+        }
+        return $merged;
+    }
+    return $translated;
 }
 
 add_filter('language_attributes',function(string $output): string {
