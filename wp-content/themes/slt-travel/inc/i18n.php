@@ -127,8 +127,11 @@ function slt_t(string $key,string $fallback=''): string {
 function slt_content_translations(): array {
     static $data=null;
     if ($data!==null) return $data;
-    $path=get_template_directory().'/inc/translations.php';
-    $data=file_exists($path) ? (array)require $path : [];
+    $base_path=get_template_directory().'/inc/translations.php';
+    $detail_path=get_template_directory().'/inc/tour-translations-detailed.php';
+    $base=file_exists($base_path) ? (array)require $base_path : [];
+    $detail=file_exists($detail_path) ? (array)require $detail_path : [];
+    $data=array_replace_recursive($base,$detail);
     return $data;
 }
 
