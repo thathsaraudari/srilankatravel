@@ -676,3 +676,41 @@ add_action('init', function (): void {
     update_option('slt_bootstrap_completed_v10_tour_catalog',1,false);
     flush_rewrite_rules(false);
 },100);
+
+
+/**
+ * V11: persist bundled multilingual content into WordPress post meta.
+ * Existing generated/admin translations are preserved.
+ */
+add_action('init', function (): void {
+    if (get_option('slt_bootstrap_completed_v11_i18n_seed')) return;
+
+    $theme_dir=get_theme_root().'/slt-travel/inc';
+    $base_file=$theme_dir.'/translations.php';
+    $detail_file=$theme_dir.'/tour-translations-detailed.php';
+    $base=file_exists($base_file)?(array)require $base_file:[];
+    $detail=file_exists($detail_file)?(array)require $detail_file:[];
+    $translations=array_replace_recursive($base,$detail);
+
+    foreach((array)($translations['tours']??[]) as $slug=>$langs){
+        $post=get_page_by_path($slug,OBJECT,'slt_tour');
+        if(!$post)continue;
+        $existing=get_post_meta($post->ID,'_slt_i18n',true);
+        if(!is_array($existing)||!$existing){
+            update_post_meta($post->ID,'_slt_i18n',$langs);
+            update_post_meta($post->ID,'_slt_i18n_updated_at',current_time('mysql'));
+        }
+    }
+
+    foreach((array)($translations['pages']??[]) as $slug=>$langs){
+        $post=get_page_by_path($slug,OBJECT,'page');
+        if(!$post)continue;
+        $existing=get_post_meta($post->ID,'_slt_i18n',true);
+        if(!is_array($existing)||!$existing){
+            update_post_meta($post->ID,'_slt_i18n',$langs);
+            update_post_meta($post->ID,'_slt_i18n_updated_at',current_time('mysql'));
+        }
+    }
+
+    update_option('slt_bootstrap_completed_v11_i18n_seed',1,false);
+},110);
