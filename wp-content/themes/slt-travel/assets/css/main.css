@@ -101,3 +101,30 @@
  .language-switcher--fixed select{width:58px!important;min-width:58px!important;padding:0 5px!important;font-size:.68rem!important}
  .language-switcher__icon{display:none}
 }
+
+/* v0.4.2 server-side language menu */
+.site-header .nav-wrap{position:relative;padding-right:250px}
+.language-menu{position:absolute;right:164px;top:50%;transform:translateY(-50%);z-index:120}
+.language-menu summary{list-style:none;display:flex;align-items:center;gap:5px;min-width:72px;height:40px;padding:0 12px;border:1px solid #cfcac0;border-radius:999px;background:#fff;color:#18221f;font-size:.76rem;font-weight:900;cursor:pointer;box-shadow:0 3px 12px rgba(19,32,27,.06)}
+.language-menu summary::-webkit-details-marker{display:none}
+.language-menu[open] summary{border-color:var(--accent)}
+.language-menu__panel{position:absolute;right:0;top:48px;width:180px;padding:7px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.language-menu__panel a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:.8rem}
+.language-menu__panel a:hover,.language-menu__panel a[aria-current="page"]{background:var(--soft)}
+.language-menu__panel strong{width:25px;color:var(--forest)}
+.language-menu__panel span{color:var(--ink)}
+.language-switcher,.language-switcher--fixed{display:none!important}
+@media(max-width:1050px){
+ .site-header .nav-wrap{padding-right:130px}
+ .language-menu{right:54px}
+}
+@media(max-width:900px){
+ .site-header .nav-wrap{padding-right:120px}
+ .language-menu{right:58px}
+}
+@media(max-width:640px){
+ .site-header .nav-wrap{padding-right:98px}
+ .language-menu{right:50px}
+ .language-menu summary{min-width:52px;height:36px;padding:0 8px;font-size:.7rem}
+ .language-menu__panel{width:160px}
+}

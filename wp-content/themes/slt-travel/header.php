@@ -8,9 +8,16 @@
 </a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav"><?php echo esc_html(slt_t('menu','Menu')); ?></button>
 <nav id="primary-nav" class="primary-nav"><?php wp_nav_menu(['theme_location'=>'primary','container'=>false,'fallback_cb'=>false]); ?></nav>
-<div class="language-switcher language-switcher--fixed">
-<span class="language-switcher__icon" aria-hidden="true">🌐</span>
-<select data-slt-language aria-label="<?php echo esc_attr(slt_t('language','Langue')); ?>"><?php echo slt_language_options_html(); ?></select>
-</div>
+<?php $current_lang=slt_current_language(); $langs=slt_supported_languages(); ?>
+<details class="language-menu">
+  <summary aria-label="<?php echo esc_attr(slt_t('language','Langue')); ?>"><span aria-hidden="true">🌐</span> <?php echo esc_html($langs[$current_lang]['short']??strtoupper($current_lang)); ?></summary>
+  <div class="language-menu__panel">
+    <?php foreach($langs as $code=>$meta): ?>
+      <a href="<?php echo esc_url(slt_language_switch_url($code)); ?>" lang="<?php echo esc_attr($code); ?>"<?php echo $current_lang===$code?' aria-current="page"':''; ?>>
+        <strong><?php echo esc_html($meta['short']); ?></strong><span><?php echo esc_html($meta['label']); ?></span>
+      </a>
+    <?php endforeach; ?>
+  </div>
+</details>
 <a class="button button--small header-cta" href="<?php echo esc_url(home_url('/contact/')); ?>"><?php echo esc_html(slt_t('nav.cta','Créer mon voyage')); ?></a>
 </div></header><main>
