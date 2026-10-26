@@ -8,6 +8,9 @@
 </a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav"><?php echo esc_html(slt_t('menu','Menu')); ?></button>
 <nav id="primary-nav" class="primary-nav"><?php wp_nav_menu(['theme_location'=>'primary','container'=>false,'fallback_cb'=>false]); ?></nav>
-<div class="language-switcher"><select data-slt-language aria-label="<?php echo esc_attr(slt_t('language','Langue')); ?>"><?php echo slt_language_options_html(); ?></select></div>
+<div class="language-switcher language-switcher--fixed">
+<span class="language-switcher__icon" aria-hidden="true">🌐</span>
+<select data-slt-language aria-label="<?php echo esc_attr(slt_t('language','Langue')); ?>"><?php echo slt_language_options_html(); ?></select>
+</div>
 <a class="button button--small header-cta" href="<?php echo esc_url(home_url('/contact/')); ?>"><?php echo esc_html(slt_t('nav.cta','Créer mon voyage')); ?></a>
 </div></header><main>
