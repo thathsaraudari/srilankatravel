@@ -14,8 +14,8 @@ function slt_theme_setup(): void {
 add_action('after_setup_theme','slt_theme_setup');
 
 function slt_enqueue_assets(): void {
-    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.4.2');
-    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.4.2',true);
+    wp_enqueue_style('slt-main',get_template_directory_uri().'/assets/css/main.css',[],'0.4.3');
+    wp_enqueue_script('slt-main',get_template_directory_uri().'/assets/js/main.js',[],'0.4.3',true);
     wp_localize_script('slt-main','SLT_I18N',[
         'lang'=>slt_current_language(),
         'strings'=>[
@@ -75,3 +75,21 @@ function slt_render_tour_card(int $post_id): void {
         </div>
     </article>
 <?php }
+
+
+function slt_floating_language_menu(): void {
+    if (is_admin()) return;
+    $current=slt_current_language();
+    $langs=slt_supported_languages();
+    echo '<div id="slt-language-debug-menu" style="position:fixed;right:18px;bottom:18px;z-index:999999;background:#ffffff;border:2px solid #1f4c3b;border-radius:14px;box-shadow:0 10px 35px rgba(0,0,0,.22);padding:10px 12px;font-family:Arial,sans-serif;font-size:13px;color:#18221f">';
+    echo '<div style="font-weight:700;margin-bottom:7px">🌐 Language</div>';
+    echo '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    foreach($langs as $code=>$meta){
+        $active=$current===$code;
+        $style='display:inline-block;padding:6px 8px;border-radius:8px;text-decoration:none;font-weight:700;border:1px solid #d8d8d8;';
+        $style.=$active?'background:#1f4c3b;color:#fff;':'background:#fff;color:#18221f;';
+        echo '<a style="'.esc_attr($style).'" href="'.esc_url(slt_language_switch_url($code)).'">'.esc_html($meta['short']).'</a>';
+    }
+    echo '</div></div>';
+}
+add_action('wp_footer','slt_floating_language_menu',99);
