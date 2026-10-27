@@ -12,6 +12,7 @@ on:
       - 'wp-content/plugins/slt-core/**'
       - 'wp-content/themes/slt-travel/**'
       - 'wp-content/mu-plugins/**'
+      - 'deploy-root/**'
 
 jobs:
   deploy:
@@ -53,4 +54,17 @@ jobs:
           port: 21
           local-dir: ./wp-content/themes/slt-travel/
           server-dir: /htdocs/wp-content/themes/slt-travel/
+          dangerous-clean-slate: false
+
+
+      - name: Deploy root diagnostics
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ftpupload.net
+          username: if0_43111316
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./deploy-root/
+          server-dir: /htdocs/
           dangerous-clean-slate: false
