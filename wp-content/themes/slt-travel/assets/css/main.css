@@ -128,3 +128,17 @@
  .language-menu summary{min-width:52px;height:36px;padding:0 8px;font-size:.7rem}
  .language-menu__panel{width:160px}
 }
+
+/* EscapeCeylan header layout: avoid hidden/collapsed brand and language control */
+.site-header .nav-wrap{width:min(1480px,calc(100% - 48px));max-width:1480px;min-height:94px;padding-right:0!important;gap:22px}
+.site-header .brand{flex:0 0 auto;min-width:245px;display:flex}
+.site-header .brand__logo--wide{display:block!important;width:245px!important;height:66px!important;max-height:none!important;max-width:none!important;object-fit:contain}
+.site-header .primary-nav{margin-left:auto}
+.site-header .primary-nav ul{gap:clamp(12px,1.4vw,25px)}
+.site-header .language-menu{position:relative!important;right:auto!important;top:auto!important;transform:none!important;flex:0 0 auto;z-index:150;order:3;display:block!important;visibility:visible!important}
+.site-header .language-menu summary{min-width:116px;white-space:nowrap;justify-content:center;border:2px solid #4d782f;background:#f4faf4;color:#173f32}
+.site-header .language-menu__label{font-size:.75rem}
+.site-header .header-cta{order:4;flex:0 0 auto}
+@media(max-width:1250px){.site-header .nav-wrap{gap:14px}.site-header .brand{min-width:205px}.site-header .brand__logo--wide{width:205px!important;height:62px!important}.site-header .primary-nav ul{gap:12px}.site-header .header-cta{display:none}}
+@media(max-width:900px){.site-header .nav-wrap{width:calc(100% - 30px);min-height:80px}.site-header .brand{min-width:175px;order:1}.site-header .brand__logo--wide{width:175px!important;height:56px!important}.site-header .language-menu{order:2;margin-left:auto}.site-header .nav-toggle{order:3;margin-left:0}.site-header .primary-nav{order:4}.site-header .language-menu summary{min-width:94px}.site-header .language-menu__label{display:none}}
+@media(max-width:420px){.site-header .brand{min-width:145px}.site-header .brand__logo--wide{width:145px!important;height:48px!important}.site-header .language-menu summary{min-width:70px;padding:0 7px}}
