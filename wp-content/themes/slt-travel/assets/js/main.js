@@ -30,3 +30,21 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 document.addEventListener('change',e=>{if(e.target.matches('.slt-booking-demo-form input[name="preferred_payment_method"]')){const form=e.target.closest('.slt-booking-demo-form'),hidden=form&&form.querySelector('.slt-booking-message');if(hidden)hidden.value='Booking demo — preferred payment method: '+e.target.value;}});
+
+/* Remove legacy floating language strips; header has the single native select. */
+document.addEventListener('DOMContentLoaded',()=>{
+  const codes=new Set(['FR','EN','DE','NL','ES']);
+  const removeLegacyStrip=()=>{
+    const controls=[...document.querySelectorAll('a,button')].filter(el=>codes.has(el.textContent.trim().toUpperCase()) && !el.closest('.slt-language-picker'));
+    const parents=new Set(controls.map(el=>el.parentElement).filter(Boolean));
+    for(const parent of parents){
+      const items=[...parent.querySelectorAll('a,button')].map(el=>el.textContent.trim().toUpperCase()).filter(code=>codes.has(code));
+      if(new Set(items).size===5 && !parent.closest('.slt-language-picker')){
+        parent.style.setProperty('display','none','important');
+      }
+    }
+  };
+  removeLegacyStrip();
+  const observer=new MutationObserver(removeLegacyStrip);
+  observer.observe(document.body,{childList:true,subtree:true});
+});
