@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 150" role="img" aria-labelledby="t d">
-<title id="t">Sri Lanka Voyages</title><desc id="d">Logo Sri Lanka Voyages avec soleil, palmier, montagne et océan</desc>
-<defs><linearGradient id="sea" x1="0" x2="1"><stop stop-color="#2b8a7f"/><stop offset="1" stop-color="#79b6a7"/></linearGradient></defs>
-<g transform="translate(4 7)">
-<circle cx="68" cy="68" r="58" fill="#f5ead8"/>
-<circle cx="77" cy="49" r="25" fill="#e69a3b"/>
-<path d="M20 91C47 72 83 70 119 80C99 84 84 93 72 105C57 98 40 94 20 91Z" fill="#285b45"/>
-<path d="M43 81L71 48L94 81Z" fill="#174737"/><path d="M59 72L71 48L80 72Z" fill="#315f4c"/>
-<path d="M12 101C43 91 79 92 126 104C93 104 64 111 39 126C29 117 20 109 12 101Z" fill="url(#sea)"/>
-<path d="M36 126C55 108 77 99 105 97C88 107 74 121 65 139Z" fill="#d88a39"/>
-<path d="M31 82C33 55 39 35 50 21" stroke="#174737" stroke-width="7" stroke-linecap="round"/>
-<path d="M49 23C30 20 17 26 9 39C28 35 40 38 49 48C48 37 48 29 49 23ZM49 24C60 9 75 4 93 8C76 15 66 25 61 39C58 32 54 27 49 24ZM45 29C27 7 12 7 0 15C20 17 33 26 41 43Z" fill="#174737"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 150" role="img" aria-labelledby="title desc">
+<title id="title">EscapeCeylan</title><desc id="desc">Sri Lankan palms, sun, Sigiriya rock and ocean waves in forest green and gold</desc>
+<g transform="translate(8 5)">
+<circle cx="72" cy="68" r="60" fill="#f4f4e9"/>
+<circle cx="99" cy="44" r="19" fill="#d6a849"/>
+<path d="M20 94 Q45 81 67 86 L79 61 L89 66 L98 58 L111 86 Q126 88 133 95 L133 109 L18 109Z" fill="#577b3f"/>
+<path d="M69 85 L79 61 L89 66 L98 58 L111 86 L103 84 L98 71 L90 76 L82 70 L76 88Z" fill="#244f37"/>
+<path d="M11 107 Q37 98 63 107 T116 107 Q130 104 136 107 M15 116 Q41 108 68 116 T131 116" fill="none" stroke="#277e70" stroke-width="5" stroke-linecap="round"/>
+<path d="M33 103 Q36 67 42 34" fill="none" stroke="#214a34" stroke-width="5" stroke-linecap="round"/>
+<path d="M42 36 Q22 16 8 27 Q27 28 42 42 Q28 7 43 4 Q51 21 42 36 Q64 10 83 23 Q61 24 42 42 Q19 39 13 55 Q28 46 42 42 Q65 37 71 53 Q54 46 42 42" fill="#285c3d"/>
+<path d="M4 127 Q65 137 137 127" fill="none" stroke="#668c54" stroke-width="3" stroke-linecap="round"/>
 </g>
-<g transform="translate(145 31)"><text x="0" y="42" font-family="Georgia,serif" font-size="50" font-weight="700" fill="#173f32">Sri Lanka</text><text x="3" y="91" font-family="Georgia,serif" font-size="37" font-style="italic" fill="#bd6934">Voyages</text><path d="M145 96C210 109 282 104 362 88" fill="none" stroke="#bd6934" stroke-width="3" stroke-linecap="round"/></g>
+<text x="162" y="83" font-family="Georgia,'Times New Roman',serif" font-size="61" letter-spacing="-2" fill="#173f32">Escape<tspan fill="#4d782f">Ceylan</tspan></text>
+<text x="166" y="112" font-family="Arial,Helvetica,sans-serif" font-size="14" letter-spacing="4.5" fill="#315d49">SRI LANKA EXPERIENCES</text>
 </svg>
