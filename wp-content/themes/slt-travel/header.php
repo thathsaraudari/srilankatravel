@@ -4,7 +4,7 @@
 <body <?php body_class(); ?>><?php wp_body_open(); ?>
 <header class="site-header"><div class="container nav-wrap">
 <a class="brand" href="<?php echo esc_url(home_url('/')); ?>">
-<img class="brand__logo brand__logo--wide" src="<?php echo esc_url(get_template_directory_uri().'/assets/images/logo-mark.svg?v=2'); ?>" width="245" height="62" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+<img class="brand__logo brand__logo--wide" src="<?php echo esc_url(get_template_directory_uri().'/assets/images/logo-mark.svg?v=3'); ?>" width="180" height="140" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
 </a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav"><?php echo esc_html(slt_t('menu','Menu')); ?></button>
 <nav id="primary-nav" class="primary-nav"><?php wp_nav_menu(['theme_location'=>'primary','container'=>false,'fallback_cb'=>false]); ?></nav>
