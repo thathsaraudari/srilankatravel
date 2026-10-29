@@ -154,3 +154,24 @@
 @media(max-width:1250px){.site-header .slt-language-picker{min-width:68px;padding-left:5px}.site-header .slt-language-picker__select{width:45px}}
 @media(max-width:900px){.site-header .slt-language-picker{order:2;margin-left:auto}.site-header .nav-toggle{order:3}.site-header .primary-nav{order:4}}
 @media(max-width:420px){.site-header .slt-language-picker{min-width:60px;gap:0}.site-header .slt-language-picker__icon{display:none}}
+
+/* Exact selected EscapeCeylan logo: retain its original stacked composition */
+.site-header .nav-wrap{min-height:142px!important}
+.site-header .brand{min-width:185px!important;flex:0 0 185px!important;max-width:185px}
+.site-header .brand__logo--wide{width:180px!important;height:140px!important;max-height:none!important;max-width:180px!important;object-fit:contain}
+.site-footer .footer-logo{width:170px;max-width:100%;height:auto;filter:none!important;border-radius:10px;background:#fffdf8}
+@media(max-width:1250px){
+ .site-header .nav-wrap{min-height:126px!important}
+ .site-header .brand{min-width:165px!important;flex-basis:165px!important;max-width:165px}
+ .site-header .brand__logo--wide{width:160px!important;height:124px!important;max-width:160px!important}
+}
+@media(max-width:900px){
+ .site-header .nav-wrap{min-height:112px!important}
+ .site-header .brand{min-width:138px!important;flex-basis:138px!important;max-width:138px}
+ .site-header .brand__logo--wide{width:136px!important;height:106px!important;max-width:136px!important}
+}
+@media(max-width:420px){
+ .site-header .nav-wrap{min-height:96px!important}
+ .site-header .brand{min-width:116px!important;flex-basis:116px!important;max-width:116px}
+ .site-header .brand__logo--wide{width:116px!important;height:91px!important;max-width:116px!important}
+}
