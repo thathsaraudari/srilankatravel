@@ -16,30 +16,12 @@ function slt_current_language(): string {
     if ($resolved!==null) return $resolved;
     $supported=array_keys(slt_supported_languages());
 
-    $requested=isset($_GET['lang']) ? sanitize_key(wp_unslash($_GET['lang'])) : '';
+    $requested=isset($_GET['lang']) && is_string($_GET['lang']) ? sanitize_key(wp_unslash($_GET['lang'])) : '';
     if (in_array($requested,$supported,true)) return $resolved=$requested;
 
-    $saved=isset($_COOKIE['slt_lang_v2']) ? sanitize_key(wp_unslash($_COOKIE['slt_lang_v2'])) : '';
-    if (in_array($saved,$supported,true)) return $resolved=$saved;
-
-    // French is the default for visitors without an explicit language preference.
+    // The URL alone determines language; a URL without lang is always French.
     return $resolved='fr';
 }
-
-add_action('init',function(): void {
-    if (!isset($_GET['lang'])) return;
-    $lang=sanitize_key(wp_unslash($_GET['lang']));
-    if (!array_key_exists($lang,slt_supported_languages())) return;
-    setcookie('slt_lang_v2',$lang,[
-        'expires'=>time()+YEAR_IN_SECONDS,
-        'path'=>COOKIEPATH ?: '/',
-        'domain'=>COOKIE_DOMAIN ?: '',
-        'secure'=>is_ssl(),
-        'httponly'=>false,
-        'samesite'=>'Lax',
-    ]);
-    $_COOKIE['slt_lang_v2']=$lang;
-},1);
 
 // Language-specific responses must not be served as the default French page.
 add_action('template_redirect', function (): void {
@@ -53,6 +35,44 @@ function slt_language_switch_url(string $lang): string {
     $url=remove_query_arg('lang');
     return add_query_arg('lang',$lang,$url);
 }
+
+// Carry an explicitly selected language through ordinary front-end navigation.
+function slt_localized_link(string $url): string {
+    if (is_admin() || slt_current_language()==='fr' || !$url) return $url;
+    $parts=wp_parse_url($url);
+    $site=wp_parse_url((string)get_option('home'));
+    if (!$parts || (isset($parts['host']) && strcasecmp($parts['host'],$site['host']??'')!==0)) return $url;
+    if (isset($parts['scheme']) && !in_array($parts['scheme'],['http','https'],true)) return $url;
+    $path=$parts['path']??'';
+    if (preg_match('~/(wp-admin|wp-json|wp-content|wp-includes)(/|$)|/wp-login\\.php$~',$path)) return $url;
+    $query=[];
+    parse_str($parts['query']??'',$query);
+    if (isset($query['lang'])) return $url;
+    return add_query_arg('lang',slt_current_language(),$url);
+}
+foreach (['post_link','page_link','post_type_link','post_type_archive_link','term_link'] as $filter) {
+    add_filter($filter,'slt_localized_link',20,1);
+}
+add_filter('nav_menu_link_attributes',function(array $atts): array {
+    if (!empty($atts['href'])) $atts['href']=slt_localized_link($atts['href']);
+    return $atts;
+},20);
+add_action('wp_footer',function(): void {
+    $lang=slt_current_language();
+    if ($lang==='fr') return;
+    ?>
+    <script>
+    document.querySelectorAll('a[href]').forEach(function(a) {
+        const raw=a.getAttribute('href');
+        if (!raw || raw.startsWith('#') || a.hasAttribute('download')) return;
+        const url=new URL(a.href,window.location.href);
+        if (url.origin!==window.location.origin || !/^https?:$/.test(url.protocol) || url.searchParams.has('lang') || /\\/(wp-admin|wp-json|wp-content|wp-includes)(\\/|$)|\\/wp-login\\.php$/.test(url.pathname)) return;
+        url.searchParams.set('lang',<?php echo wp_json_encode($lang); ?>);
+        a.href=url.href;
+    });
+    </script>
+    <?php
+},99);
 
 function slt_ui_dictionary(): array {
     return [
