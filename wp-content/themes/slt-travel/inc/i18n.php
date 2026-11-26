@@ -22,13 +22,7 @@ function slt_current_language(): string {
     $saved=isset($_COOKIE['slt_lang']) ? sanitize_key(wp_unslash($_COOKIE['slt_lang'])) : '';
     if (in_array($saved,$supported,true)) return $resolved=$saved;
 
-    $browser=strtolower((string)($_SERVER['HTTP_ACCEPT_LANGUAGE']??''));
-    if ($browser!=='') {
-        foreach (preg_split('/[,;]/',$browser)?:[] as $part) {
-            $candidate=substr(trim($part),0,2);
-            if (in_array($candidate,$supported,true)) return $resolved=$candidate;
-        }
-    }
+    // French is the default for visitors without an explicit language preference.
     return $resolved='fr';
 }
 
