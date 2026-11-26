@@ -19,7 +19,7 @@ function slt_current_language(): string {
     $requested=isset($_GET['lang']) ? sanitize_key(wp_unslash($_GET['lang'])) : '';
     if (in_array($requested,$supported,true)) return $resolved=$requested;
 
-    $saved=isset($_COOKIE['slt_lang']) ? sanitize_key(wp_unslash($_COOKIE['slt_lang'])) : '';
+    $saved=isset($_COOKIE['slt_lang_v2']) ? sanitize_key(wp_unslash($_COOKIE['slt_lang_v2'])) : '';
     if (in_array($saved,$supported,true)) return $resolved=$saved;
 
     // French is the default for visitors without an explicit language preference.
@@ -30,7 +30,7 @@ add_action('init',function(): void {
     if (!isset($_GET['lang'])) return;
     $lang=sanitize_key(wp_unslash($_GET['lang']));
     if (!array_key_exists($lang,slt_supported_languages())) return;
-    setcookie('slt_lang',$lang,[
+    setcookie('slt_lang_v2',$lang,[
         'expires'=>time()+YEAR_IN_SECONDS,
         'path'=>COOKIEPATH ?: '/',
         'domain'=>COOKIE_DOMAIN ?: '',
@@ -38,8 +38,16 @@ add_action('init',function(): void {
         'httponly'=>false,
         'samesite'=>'Lax',
     ]);
-    $_COOKIE['slt_lang']=$lang;
+    $_COOKIE['slt_lang_v2']=$lang;
 },1);
+
+// Language-specific responses must not be served as the default French page.
+add_action('template_redirect', function (): void {
+    if (isset($_GET['lang']) || slt_current_language() !== 'fr') {
+        if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+        nocache_headers();
+    }
+}, 0);
 
 function slt_language_switch_url(string $lang): string {
     $url=remove_query_arg('lang');
