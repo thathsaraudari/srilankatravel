@@ -7,7 +7,7 @@ on:
     paths:
       - 'wp-content/plugins/slt-core/**'
       - 'wp-content/themes/slt-travel/**'
-      - 'wp-content/mu-plugins/slt-bootstrap.php'
+      - 'wp-content/mu-plugins/**'
       - '.github/workflows/deploy-easywp.yml'
 
 permissions:
@@ -36,13 +36,26 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
-          import os, pathlib, posixpath, stat, tempfile
+          import os, pathlib, posixpath, stat, tempfile, socket
           import paramiko
 
           required = ('EASYWP_HOST','EASYWP_USERNAME','EASYWP_PASSWORD')
           missing = [key for key in required if not os.environ.get(key)]
           if missing:
               raise SystemExit('Missing GitHub secrets: ' + ', '.join(missing))
+          host = os.environ['EASYWP_HOST'].strip()
+          if host.startswith('sftp://'):
+              host = host[7:]
+          host = host.rstrip('/')
+          if host.endswith(':22'):
+              host = host[:-3]
+          if host != 'fs-anacreon.easywp.com':
+              raise SystemExit('EASYWP_HOST does not match the expected EasyWP hostname. Set it to fs-anacreon.easywp.com without a URL scheme or port.')
+          try:
+              socket.getaddrinfo(host, 22, type=socket.SOCK_STREAM)
+          except socket.gaierror as exc:
+              raise SystemExit('EasyWP hostname DNS resolution failed: ' + str(exc))
+          print('EasyWP hostname resolved successfully.')
           client = paramiko.SSHClient()
           with tempfile.NamedTemporaryFile(mode='w') as keys:
               # Public host key supplied from the owner's ssh-keyscan; verify with provider.
@@ -50,7 +63,7 @@ jobs:
               keys.flush()
               client.load_host_keys(keys.name)
           client.set_missing_host_key_policy(paramiko.RejectPolicy())
-          client.connect(os.environ['EASYWP_HOST'], port=22,
+          client.connect(host, port=22,
                          username=os.environ['EASYWP_USERNAME'],
                          password=os.environ['EASYWP_PASSWORD'],
                          look_for_keys=False, allow_agent=False,
@@ -81,6 +94,9 @@ jobs:
                       for local in sorted(pathlib.Path(folder).rglob('*')):
                           if local.is_file() and not local.is_symlink():
                               upload(local)
+                  for local in sorted(pathlib.Path('wp-content/mu-plugins').glob('slt-*.php')):
+                      if local.name != 'slt-bootstrap.php':
+                          upload(local)
                   upload(pathlib.Path('wp-content/mu-plugins/slt-bootstrap.php'))
                   print('Custom code uploaded. Verify WordPress activation and frontend in browser.')
           finally:
