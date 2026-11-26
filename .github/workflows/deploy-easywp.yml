@@ -1,0 +1,87 @@
+name: Deploy to EasyWP
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'wp-content/plugins/slt-core/**'
+      - 'wp-content/themes/slt-travel/**'
+      - 'wp-content/mu-plugins/slt-bootstrap.php'
+      - '.github/workflows/deploy-easywp.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: easywp-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      EASYWP_HOST: ${{ secrets.EASYWP_HOST }}
+      EASYWP_USERNAME: ${{ secrets.EASYWP_USERNAME }}
+      EASYWP_PASSWORD: ${{ secrets.EASYWP_PASSWORD }}
+      EASYWP_KNOWN_HOSTS: ${{ secrets.EASYWP_KNOWN_HOSTS }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP
+        run: |
+          find wp-content -type f -name '*.php' -print0 | xargs -0 -r -n1 php -l
+      - name: Install SFTP client
+        run: python -m pip install 'paramiko>=3.5,<5'
+      - name: Upload custom WordPress code
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, pathlib, posixpath, stat, tempfile
+          import paramiko
+
+          required = ('EASYWP_HOST','EASYWP_USERNAME','EASYWP_PASSWORD','EASYWP_KNOWN_HOSTS')
+          missing = [key for key in required if not os.environ.get(key)]
+          if missing:
+              raise SystemExit('Missing GitHub secrets: ' + ', '.join(missing))
+          client = paramiko.SSHClient()
+          with tempfile.NamedTemporaryFile(mode='w') as keys:
+              keys.write(os.environ['EASYWP_KNOWN_HOSTS'].strip() + '\n')
+              keys.flush()
+              client.load_host_keys(keys.name)
+          client.set_missing_host_key_policy(paramiko.RejectPolicy())
+          client.connect(os.environ['EASYWP_HOST'], port=22,
+                         username=os.environ['EASYWP_USERNAME'],
+                         password=os.environ['EASYWP_PASSWORD'],
+                         look_for_keys=False, allow_agent=False,
+                         timeout=30, auth_timeout=30)
+          try:
+              with client.open_sftp() as sftp:
+                  def isdir(path):
+                      try:
+                          return stat.S_ISDIR(sftp.stat(path).st_mode)
+                      except FileNotFoundError:
+                          return False
+                  candidates = ['.', '/', '/htdocs', '/public_html', '/wordpress', '/www']
+                  roots = {sftp.normalize(p) for p in candidates
+                           if isdir(posixpath.join(p, 'wp-content/plugins'))
+                           and isdir(posixpath.join(p, 'wp-content/themes'))}
+                  if len(roots) != 1:
+                      raise SystemExit('Could not identify a unique WordPress root; inspect the SFTP directory layout.')
+                  root = roots.pop()
+                  def mkdir(path):
+                      if not isdir(path):
+                          mkdir(posixpath.dirname(path))
+                          sftp.mkdir(path)
+                  def upload(local):
+                      remote = posixpath.join(root, local.as_posix())
+                      mkdir(posixpath.dirname(remote))
+                      sftp.put(str(local), remote, confirm=True)
+                  for folder in ('wp-content/plugins/slt-core', 'wp-content/themes/slt-travel'):
+                      for local in sorted(pathlib.Path(folder).rglob('*')):
+                          if local.is_file() and not local.is_symlink():
+                              upload(local)
+                  upload(pathlib.Path('wp-content/mu-plugins/slt-bootstrap.php'))
+                  print('Custom code uploaded. Verify WordPress activation and frontend in browser.')
+          finally:
+              client.close()
+          PY
