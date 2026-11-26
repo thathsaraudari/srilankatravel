@@ -175,3 +175,8 @@
  .site-header .brand{min-width:116px!important;flex-basis:116px!important;max-width:116px}
  .site-header .brand__logo--wide{width:116px!important;height:91px!important;max-width:116px!important}
 }
+
+/* Homepage slideshow: lighter imagery and more compact headline. */
+.hero .hero__overlay{background:linear-gradient(90deg,rgba(11,24,20,.55),rgba(11,24,20,.05)),linear-gradient(0deg,rgba(8,18,15,.28),transparent 60%)}
+.hero__content h1{font-size:clamp(2.65rem,5.8vw,5.5rem);text-shadow:0 2px 12px rgba(0,0,0,.28)}
+.hero__content p{font-size:1.1rem;text-shadow:0 1px 8px rgba(0,0,0,.35)}
