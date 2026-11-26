@@ -39,13 +39,14 @@ jobs:
           import os, pathlib, posixpath, stat, tempfile
           import paramiko
 
-          required = ('EASYWP_HOST','EASYWP_USERNAME','EASYWP_PASSWORD','EASYWP_KNOWN_HOSTS')
+          required = ('EASYWP_HOST','EASYWP_USERNAME','EASYWP_PASSWORD')
           missing = [key for key in required if not os.environ.get(key)]
           if missing:
               raise SystemExit('Missing GitHub secrets: ' + ', '.join(missing))
           client = paramiko.SSHClient()
           with tempfile.NamedTemporaryFile(mode='w') as keys:
-              keys.write(os.environ['EASYWP_KNOWN_HOSTS'].strip() + '\n')
+              # Public host key supplied from the owner's ssh-keyscan; verify with provider.
+              keys.write((os.environ.get('EASYWP_KNOWN_HOSTS', '').strip() or 'fs-anacreon.easywp.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC70pSs6Es8GQUg8PsfJz+qqguvOxQvSmyKsxUxExMBqhnU/+JeDd2ayq1j8T8TowAccmsMtML2+EzRYIwAsi7Gn7ebxNRp4UmBs30cAIFHOWoz3CYHuImPcjAwva9mrNXHXhJSmwtQvnVy5HIA/yMx0vHDUKu6C7enJaLlBVqFoiC8wVfGzwCB4FvNs7ln1+zvLxjLTfft4t58Kp6NP5Wzo5akKL3flKBVt4kWOe8IxiAmMspkjKCUJUzd1UroEd26mKlOmlJG57y0C/+20fF3g4zqW3PBrUkK2N4gfSYoE7RTHoejp4FDap/PGwsItlXPHVJ/7+LiEIX5Mbiz2fohjXP7pWwG7ZpmKnMkD10DCec0JxhTH5QDrS0rbmP+Ft4wfYQSmc3hUdQely2Mt9hzH3eVreW7ZGk/neX1BUSdG7/lTfOOEZFwuDW1gV8Laggjz42CppHkRsvd21OLPLPHa2YpzxkfnS9un0MP5l2h/RAAdGYgIp4yFNFww0TVSCz/Fz5mYjpolTSMvj/98oa9lCJYZAcxwB1RhtfBIPAK14frQqjA4xQgzhL1gfBxwgMcVfKomo9e8kucd6TAkyCNh7umXRcRwGnJa5nslvADwRghGRJ4ANjLfydGXYSH6igR5XdTlIHFxq26m/ANu4xUEbNJFS0pd4bnEc8/kY5C+w==') + '\n')
               keys.flush()
               client.load_host_keys(keys.name)
           client.set_missing_host_key_policy(paramiko.RejectPolicy())
